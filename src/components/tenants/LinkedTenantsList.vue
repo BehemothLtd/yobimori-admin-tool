@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import { BaseButton, ToggleSwitch } from "@/components/base";
 import CreateLinkedTenantModal from "./CreateLinkedTenantModal.vue";
 import type { Tenant, LinkedTenant } from "@/types/tenant";
@@ -33,16 +33,30 @@ const handleDeleteLinkedTenant = (linkedTenant: LinkedTenant) => {
 };
 
 const handleOpenCreateModal = () => {
+  isModalOpen.value = true;
+
   if (props.allTenants && props.allTenants.length > 0) {
     availableTenants.value = props.allTenants;
   } else {
+    availableTenants.value = [];
+
     emit("load-tenants");
   }
-  isModalOpen.value = true;
 };
+
+watch(
+  () => props.allTenants,
+  (newValue) => {
+    if (newValue && newValue.length > 0) {
+      availableTenants.value = newValue;
+    }
+  }
+);
 
 const handleCloseModal = () => {
   isModalOpen.value = false;
+
+  availableTenants.value = [];
 };
 
 const handleCreateLinkedTenant = (
@@ -100,7 +114,7 @@ const handleCreateLinkedTenant = (
         <!-- Card Details -->
         <div class="space-y-2 mb-3">
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
-            <div>
+            <div class="text-start">
               <span class="text-gray-600">テナントID:</span>
               <span class="ml-2 text-gray-900 font-mono text-xs break-all">
                 {{ linkedTenant.tenant.id }}
@@ -119,14 +133,14 @@ const handleCreateLinkedTenant = (
               :model-value="linkedTenant.realtime"
               @update:model-value="handleToggleRealtime(linkedTenant)"
             />
-            <span class="text-sm">
+            <span class="text-sm" v-if="linkedTenant.realtime">
               <span
                 :class="[
                   'ml-2',
                   linkedTenant.realtime ? 'text-primary' : 'text-gray-500',
                 ]"
               >
-                {{ linkedTenant.realtime ? "即時通知連携" : "他船要請連携" }}
+                即時通知連携
               </span>
             </span>
           </div>

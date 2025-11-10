@@ -49,7 +49,8 @@ const handleLogout = () => {
             <button
               v-if="isMobile"
               @click="toggleDrawer"
-              class="p-2 rounded-lg text-white hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white/50 transition-all duration-200"
+              class="p-2 rounded-lg bg-[#ff8a65] text-white focus:outline-none focus:ring-2 focus:ring-white/50 transition-all duration-200"
+              background-color="#ff8a65"
               aria-label="Open menu"
             >
               <svg

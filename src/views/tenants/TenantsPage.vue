@@ -65,7 +65,6 @@ const columns: TableColumn[] = [
     label: "アクション",
     type: "button",
     width: "150px",
-    align: "center",
     render: () => "詳細",
   },
 ];
