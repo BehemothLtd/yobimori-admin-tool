@@ -1,0 +1,135 @@
+query GetTenants($limit: Int, $nextToken: String) {
+  getTenants(limit: $limit, nextToken: $nextToken) {
+    tenants {
+      id
+      name
+      address
+      createdAt
+      updatedAt
+    }
+    nextToken
+  }
+}
+
+query GetTenantById($id: ID!) {
+  getTenantById(id: $id) {
+    id
+    name
+    address
+    createdAt
+    updatedAt
+    topicArn
+  }
+}
+
+query GetTenantWithMembers($id: ID!) {
+  getTenantById(id: $id) {
+    id
+    name
+    address
+    createdAt
+    updatedAt
+    topicArn
+    members {
+      id
+      name
+      nickname
+      encryptedPassword
+      tenants {
+        id
+        name
+      }
+      devices {
+        devices {
+          id
+          imei
+          deviceType
+        }
+      }
+      lineUsers {
+        userId
+        displayName
+        pictureUrl
+      }
+    }
+  }
+}
+
+query GetLinkedTenants($tenantId: ID!) {
+  getLinkedTenants(tenantId: $tenantId) {
+    id
+    tenantId
+    linkedTenantId
+    realtime
+    createdAt
+    createdBy
+    tenant {
+      id
+      name
+      address
+      createdAt
+      updatedAt
+      topicArn
+    }
+  }
+}
+
+mutation UpdateTenant($id: ID!, $name: String, $address: String) {
+  updateTenant(id: $id, name: $name, address: $address) {
+    id
+    name
+    address
+    updatedAt
+  }
+}
+
+mutation CreateTenantLink(
+  $tenantId: ID!
+  $linkedTenantId: ID!
+  $createdBy: ID!
+  $realtime: Boolean
+) {
+  createTenantLink(
+    tenantId: $tenantId
+    linkedTenantId: $linkedTenantId
+    createdBy: $createdBy
+    realtime: $realtime
+  ) {
+    id
+    tenantId
+    linkedTenantId
+    realtime
+    createdAt
+    createdBy
+  }
+}
+
+mutation UpdateTenantLink($tenantId: ID!, $linkedTenantId: ID!) {
+  updateTenantLink(tenantId: $tenantId, linkedTenantId: $linkedTenantId) {
+    id
+    tenantId
+    linkedTenantId
+    realtime
+  }
+}
+
+mutation DeleteTenantLink($tenantId: ID!, $linkedTenantId: ID!) {
+  deleteTenantLink(tenantId: $tenantId, linkedTenantId: $linkedTenantId)
+}
+
+mutation CreateTenant($name: String!, $address: String) {
+  createTenant(name: $name, address: $address) {
+    id
+    name
+    address
+    createdAt
+    updatedAt
+  }
+}
+
+mutation DeleteTenant($id: ID!) {
+  deleteTenant(id: $id) {
+    id
+    name
+  }
+}

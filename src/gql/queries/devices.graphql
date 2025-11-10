@@ -1,0 +1,90 @@
+query GetDeviceById($id: ID!) {
+  getDeviceById(id: $id) {
+    id
+    imei
+    deviceType
+    registeredAt
+    updatedAt
+    status {
+      batteryPercentage
+      sos
+      location {
+        latitude
+        longitude
+      }
+    }
+    owner {
+      id
+      name
+      nickname
+    }
+  }
+}
+
+query GetDeviceByIMEI($imei: String!) {
+  getDeviceByIMEI(imei: $imei) {
+    id
+    imei
+    deviceType
+    registeredAt
+    updatedAt
+    status {
+      batteryPercentage
+      sos
+      location {
+        latitude
+        longitude
+      }
+    }
+    owner {
+      id
+      name
+    }
+  }
+}
+
+query GetDevicesByUserId($userId: ID!, $limit: Int, $nextToken: String) {
+  getDevicesByUserId(userId: $userId, limit: $limit, nextToken: $nextToken) {
+    devices {
+      id
+      imei
+      deviceType
+      registeredAt
+      status {
+        batteryPercentage
+        sos
+      }
+    }
+    nextToken
+  }
+}
+
+mutation RegisterDevice($imei: String!, $deviceType: DeviceType!) {
+  registerDevice(imei: $imei, deviceType: $deviceType) {
+    id
+    imei
+    deviceType
+    registeredAt
+  }
+}
+
+mutation UpdateDeviceOwner($deviceId: ID!, $fisherUserId: ID!) {
+  updateDeviceOwner(deviceId: $deviceId, fisherUserId: $fisherUserId) {
+    id
+    owner {
+      id
+      name
+    }
+    updatedAt
+  }
+}
+
+mutation DisassociateDevice($deviceId: ID!) {
+  disassociateDevice(deviceId: $deviceId) {
+    id
+    owner {
+      id
+    }
+    updatedAt
+  }
+}

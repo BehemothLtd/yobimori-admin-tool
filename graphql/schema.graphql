@@ -1,0 +1,681 @@
+schema {
+  query: Query
+  mutation: Mutation
+  subscription: Subscription
+}
+
+type Query @aws_iam @aws_cognito_user_pools {
+  # Accident関連のクエリ
+
+  # 全てのステータスがOPENのAccidentを取得する。
+  # 注意 Admin Toolで事故の状況を可視化するために追加したが、フロントエンド側が未実装
+  getOpenAccidents: [Accident!]!
+
+  # 指定したIDのAccidentを取得する。
+  # id 取得するAccidentのID
+  getAccidentById(id: ID!): Accident
+
+  # 指定したDeviceに紐づくAccidentを発生時刻順で取得する。
+  # 注意 現在は恐らく使用されていない。
+  # deviceId 取得するAccidentに紐づくDeviceのID
+  # asc trueで昇順、falseで降順
+  # limit 取得する件数の上限
+  # nextToken 次のページを取得するためのトークン（未指定の場合は最初のページ）
+  getAccidentsByDeviceIdSortedByCreatedAt(deviceId: ID!, asc: Boolean, limit: Int, nextToken: String): AccidentPage
+
+  # 指定したFisherUserに紐づくステータスがOPENのAccidentを取得する。
+  # モバイルアプリ起動時に最初に呼び出され、このAPIから値が返却されると事故画面に遷移する。
+  # userId Accidentを取得するFisherUserのID
+  getOpenAccidentsForFisherUser(userId: ID): AccidentPage
+
+  # 指定した位置から近く、かつステータスがOPENのAccidentを取得する。
+  # モバイルアプリ起動時に、現在地から近い事故を取得するために使用する。
+  # location 指定した位置（緯度・経度）
+  getOpenNearAccidents(location: GeoLocationInput): AccidentPage
+
+  # Device関連のクエリ
+
+  # 指定したIMEIのDeviceを取得する。
+  # imei 取得するDeviceのIMEI
+  getDeviceByIMEI(imei: String!): Device
+
+  # 指定したIDのDeviceを取得する。
+  # id 取得するDeviceのID
+  getDeviceById(id: ID!): Device
+
+  # 指定したFisherUserに紐づくDeviceを取得する。
+  # userId 取得するDeviceの所有者であるFisherUserのID
+  # limit 取得する件数の上限
+  # nextToken 次のページを取得するためのトークン（未指定の場合は最初のページ）
+  getDevicesByUserId(userId: ID!, limit: Int, nextToken: String): DevicePage
+
+  # FisherUser関連のクエリ
+
+  # 指定したIDのFisherUserを取得する。
+  # id 取得するFisherUserのID
+  getFisherUserById(id: ID!): FisherUser
+
+  # 指定した名前のFisherUserを取得する。
+  # name 取得するFisherUserの名前
+  getFisherUserByName(name: String!): FisherUser
+
+  # Tenant関連のクエリ
+
+  # 指定したIDのTenantを取得する。
+  # id 取得するTenantのID
+  getTenantById(id: ID!): Tenant
+
+  # 全てのTenantを取得する。
+  # Admin ToolでTenantの一覧を表示するために使用する。
+  # limit 取得する件数の上限
+  getTenants(limit: Int, nextToken: String): TenantPage
+
+  # LinkedTenant queries
+  # Get linked tenants for a specific tenant.
+  # tenantId ID of the tenant to get links for
+  getLinkedTenants(tenantId: ID!): [LinkedTenant!]!
+}
+
+type Mutation @aws_iam @aws_cognito_user_pools {
+  # Accident関連のミューテーション
+
+  # Accidentを作成する。
+  # DeviceからSOS信号が発せられたら、yobimori_report_workflowがそれを検知してこのAPIを呼び出す。
+  # sosDeviceId SOS信号を発したDeviceのID
+  createAccident(sosDeviceId: ID!): Accident
+
+  # RescuingUserを追加する。
+  # モバイルアプリ上で「救助に向かう」ボタンが押されたときに呼び出される。
+  # accidentId RescuingUserを追加するAccidentのID
+  # fisherUserId RescuingUserのID
+  addRescuingUser(accidentId: ID!, fisherUserId: ID!): Accident
+
+  # RescuingUserを削除する。
+  # 注意 モバイルアプリ上で「救助をキャンセルする」ボタンが押されたときに呼び出される想定だが、現在は未実装
+  # accidentId RescuingUserを削除するAccidentのID
+  # fisherUserId 削除するRescuingUserのID
+  removeRescuingUser(accidentId: ID!, fisherUserId: ID!): Accident
+
+  # Accidentのステータスを CLOSED_RESCUED に変更する。
+  # モバイルアプリ上で「救助完了」ボタンが押されたときに呼び出される。
+  # accidentId ステータスを変更するAccidentのID
+  # rescuerUserId 救助を完了したFisherUserのID
+  setRescued(accidentId: ID!, rescuerUserId: ID!): Accident
+
+  # AccidentのステータスをCLOSED_FALSE_ALARMに変更する。
+  # モバイルアプリ上で要救助者本人が「誤作動を報告する」ボタンを押したときに呼び出される。
+  # accidentId ステータスを変更するAccidentのID
+  setFalseAlarm(accidentId: ID!): Accident
+
+  # RescuingUserの位置情報を報告する。
+  # addRescuingUserで救助者に登録されたユーザーは、モバイルアプリを開いているときに定期的にこのAPIを呼んで自分の位置情報を報告する。
+  # accidentId 位置情報を報告するAccidentのID
+  # location 位置情報
+  reportRescuingUserLocation(accidentId: ID!, location: GeoLocationInput!): RescuingUserLocationEvent
+
+  # Accidentを指定した別のTenantにエスカレーションする。
+  # エスカレーション先のTenantには通知は送信しない。
+  # 注意 現在はモバイルアプリ側でエスカレーションする機能はなく、report_workflowからAccidentが発生したTenantのエスカレーション先Tenantとして設定されている全てのTenantにエスカレーションする。
+  # accidentId エスカレーションするAccidentのID
+  # escalatingTenantId エスカレーション元のTenantのID
+  # escalatedTenantId エスカレーション先のTenantのID
+  escalateAccident(accidentId: ID!, escalatingTenantId: ID!, escalatedTenantId: ID!): Accident
+
+  # CLOSED_RESCUEDまたはCLOSED_FALSE_ALARMのAccidentに対して既読をつける。
+  # Accidentが閉じられたときに、Tenantのメンバーのモバイルアプリにポップアップを表示するために使用する。
+  # この API が呼び出された後にモバイルアプリを開くと、その事故の通知を既読として扱い、ポップアップは表示されなくなる。
+  # accidentId 既読にするAccidentのID
+  setConfirmedClosedAccident(accidentId: ID!): Accident
+
+  # Device関連のミューテーション
+
+  # Deviceに紐づくFisherUserを削除する。
+  # 使用されなくなったDeviceを所有者から解除するために使用する。
+  # deviceId 所有者FisherUserを削除するDeviceのID
+  disassociateDevice(deviceId: ID!): Device
+
+  # Deviceの信号データを送信する。
+  # Deviceから信号データを受信したら、yobimori_report_workflowからこのAPIを呼び出して信号データを保存する。
+  # imei 信号データを送信したDeviceのIMEI
+  # sos SOS信号が送信されたかどうか（true 送信された, false 送信されていない）
+  # batteryPercentage バッテリー残量
+  # location 位置情報
+  # type 信号の種類
+  # charging 充電中かどうか（true 充電中, false 充電中でない）
+  # firmwareVersion ファームウェアのバージョン
+  sendMT825Event(
+    imei: String!
+    sos: Boolean
+    batteryPercentage: Int
+    location: GeoLocationInput
+    type: MT825EventType
+    charging: Boolean
+    firmwareVersion: String
+  ): Device
+
+  # Deviceを登録する。
+  # Admin ToolまたはOperation ToolsでDeviceを登録するために使用する。
+  # imei 登録するDeviceのIMEI
+  # deviceType 登録するDeviceの種類
+  registerDevice(imei: String!, deviceType: DeviceType!): Device
+
+  # Deviceの所有者を更新する。
+  # Admin ToolまたはOperation ToolsでDeviceの所有者を更新するために使用する。
+  # deviceId 所有者を更新するDeviceのID
+  # fisherUserId 新しい所有者FisherUserのID
+  updateDeviceOwner(deviceId: ID!, fisherUserId: ID!): Device
+
+  # FisherUser関連のミューテーション
+
+  # FisherUserを作成する。
+  # Admin ToolまたはOperation ToolsでFisherUserを作成するために使用する。
+  # id FisherUserのID
+  # name FisherUserの名前
+  createFisherUser(id: ID!, name: String!): FisherUser
+
+  # FisherUserの名前を更新する。
+  # Admin ToolでFisherUserの名前を更新するために使用する。
+  # nickname 新しいFisherUserのニックネーム
+  # id FisherUserのID
+  updateFisherUserNickname(nickname: String, id: ID): FisherUser
+
+  # FisherUserのパスワードを更新する。
+  # よびもりは、パスワードを良く忘れるお客様が多いため、Admin Tool で FisherUser のパスワードを閲覧できるようにしており、
+  # そのために、よびもりシステムのDynamoDB上にパスワードを(暗号化した上で)保存する必要があり、
+  # そのために (リスクを飲んで) この API を使用している
+  # ※ 現状、アプリのログインパスワードを変更するためには、別途 Cognito の API を使用する必要がある
+  # (この API の中で Cognito のパスワード更新 API も呼んでしまうようにすれば、この API を呼ぶだけでよびもりシステムのパスワード(DynamoDB)と Cognito のパスワードが変更される)
+  # id パスワードを更新するFisherUserのID
+  # password 新しいFisherUserのパスワード（平文）
+  updateFisherUserPasswordWithEncryption(id: ID, password: String): FisherUser
+
+  # FisherUserのTenantを更新する。
+  # Admin ToolまたはOperation ToolsでFisherUserのTenantを更新するために使用する。
+  # userId Tenantを更新するFisherUserのID
+  # tenantId 新しいTenantのID
+  # isNotPrimary メインテナントでないかどうか（true メインテナントでない, false メインテナント）
+  #               メインテナントの場合は、そのテナントで事故が発生したときに通知を受け取る。
+  #               メインテナントでない場合は、そのテナントで事故が発生しても通知を受け取らない（ただしモバイルアプリを開くと事故画面に表示される）。
+  setTenant(userId: ID!, tenantId: ID!, isNotPrimary: Boolean): FisherUser
+
+  # LinkedTenant related mutations
+
+  # Create a link between tenants.
+  # tenantId ID of the source tenant
+  # linkedTenantId ID of the target tenant
+  # createdBy ID of the user creating the link
+  # realTime Whether the link should be real-time (default: false)
+  createTenantLink(tenantId: ID!, linkedTenantId: ID!, createdBy: ID!, realtime: Boolean): LinkedTenant
+
+  # Update a link between tenants (toggle realTime field).
+  # tenantId ID of the source tenant
+  # linkedTenantId ID of the target tenant
+  updateTenantLink(tenantId: ID!, linkedTenantId: ID!): LinkedTenant
+
+  # Delete a link between tenants.
+  # tenantId ID of the source tenant
+  # linkedTenantId ID of the target tenant
+  deleteTenantLink(tenantId: ID!, linkedTenantId: ID!): Boolean
+
+  # AppDevice関連のミューテーション
+
+  # FisherUserに紐づくAppDeviceを登録する。
+  # ログイン時にこのAPIを呼び出して、端末情報をDBに登録する。
+  # input 登録するAppDeviceの情報
+  registerAppDevice(input: RegisterAppDeviceInput!): AppDevice
+
+  # FisherUserに紐づくAppDeviceを削除する。
+  # ログアウト時にこのAPIを呼び出して、端末情報をDBから削除する。
+  # input 削除するAppDeviceの情報
+  deregisterAppDevice(input: DeregisterAppDeviceInput!): AppDevice
+
+  # AppDeviceの位置情報を報告する。
+  # モバイルアプリを開いているときに定期的にこのAPIを呼んで自分の位置情報を報告する。
+  # 注意 現在は実装されていないが、Accidentが発生した際に最近接のN人を特定し、通知を送信するために使用することを想定している。
+  reportAppDeviceLocation(location: GeoLocationInput!): AppDeviceLocationEvent
+
+  # Tenant関連のミューテーション
+
+  # Tenantを作成する。
+  # Admin ToolまたはOperation ToolsでTenantを作成するために使用する。
+  # name Tenantの名前
+  # address Tenantの住所
+  createTenant(name: String!, address: String): Tenant
+
+  # Tenantの名前と住所を更新する。
+  # Admin ToolまたはOperation ToolsでTenantの名前と住所を更新するために使用する。
+  # id 更新するTenantのID
+  # name 新しいTenantの名前
+  # address 新しいTenantの住所
+  updateTenant(id: ID!, name: String, address: String): Tenant
+
+  # Tenantに対してエスカレーション先のTenantを追加する。
+  # Tenant1に対してエスカレーション先のTenant2を登録すると、Tenant1で事故が発生したときに、Tenant2のメンバーのモバイルアプリでも事故画面を閲覧できるようになる。
+  # 注意 クライアント側の実装が完了していないため、現在はAppSyncコンソールから直接呼び出して使用する。
+  # tenantId エスカレーション先を追加するTenantのID
+  # escalatingTenantId エスカレーション先のTenantのID
+  setEscalatingTenant(tenantId: String!, escalatingTenantId: String!): Tenant
+
+  # Notification関連のミューテーション
+
+  # 指定したFisherUserに紐づくAppDeviceに対してデモ通知を送信する。
+  # モバイルアプリ上でデモ通知を送信するために使用する。
+  # fisherUserId デモ通知を送信するFisherUserのID
+  sendTestNotification(fisherUserId: ID): FisherUser
+
+  # 指定したTenantのメンバーに対して指定した通知を送信する。
+  # tenantId 通知を送信するTenantのID
+  # notificationInput 通知の内容
+  # extraData Push通知に付加するデータ。OneSignalのPush Notification APIの'data'フィールドに設定される。
+  sendNotificationToTenant(tenantId: ID!, notificationInput: NotificationInput!, extraData: String): Tenant
+
+  # 指定したFisherUserに対して通知を送信する。
+  # Accidentを起こした本人へ「あなたは現在SOSを発信しています。誤作動の場合は、速やかにキャンセルしてください。」の通知を送信するために使用する。
+  # fisherUserId 通知を送信するFisherUserのID
+  # notificationInput 通知の内容
+  sendNotificationToFisherUser(fisherUserId: ID!, notificationInput: NotificationInput!): FisherUser
+
+  # 指定した位置から一定範囲内にいるFisherUserに対して通知を送信する。
+  # 注意 現在は使用されていない。将来的にAccidentが発生した際に、その位置から一定範囲内のFisherUserに通知を送信する機能を実装する予定。
+  # location 通知を送信する中心位置
+  # radius 通知を送信する範囲（メートル）
+  # notificationInput 通知の内容
+  # extraData Push通知に付加するデータ。OneSignalのPush Notification APIの'data'フィールドに設定される。
+  sendNotificationToSpecificLocation(
+    location: GeoLocationInput
+    radius: Int
+    notificationInput: NotificationInput!
+    extraData: String
+  ): SendNotificationToSpecificLocationResponse
+
+  # LINE関連のミューテーション
+
+  # FisherUserに連携されたLINEユーザーにメッセージを送信する。
+  # Accident発生時、事故の状況をLINEでも通知するために使用する。
+  # fisherUserId LINEメッセージを送信するFisherUserのID
+  # messageInput 送信するメッセージ
+  sendLineMessageToAssociatedWithFisherUser(fisherUserId: ID!, messageInput: LineMessageInput!): FisherUser
+
+  # FisherUserに連携されたLINEユーザーに位置情報メッセージを送信する。
+  # Accident発生時、事故の状況と位置情報をLINEでも通知するために使用する。
+  # fisherUserId LINE位置情報メッセージを送信するFisherUserのID
+  # messageTitle 送信するメッセージのタイトル
+  # location 送信する位置情報
+  sendLineLocationMessageToAssociatedWithFisherUser(
+    fisherUserId: ID!
+    messageTitle: String!
+    location: GeoLocationInput!
+  ): FisherUser
+
+  # FisherUserに連携されたLINEユーザーを連携解除する。
+  # Admin ToolからLINE連携を解除するために使用する。
+  # fisherUserId LINE連携を解除するFisherUserのID
+  # lineUserId LINE連携を解除するLINEユーザーのID
+  stopLineUserSubscriptionToFisherUser(fisherUserId: ID!, lineUserId: ID!): FisherUser
+
+  # 削除関連のミューテーション
+
+  # FisherUserを削除する。
+  # Admin ToolでFisherUserを削除するために使用する。
+  # 注意: 削除前に以下の関連データの処理が自動実行される
+  # - 所有デバイスの所有者解除
+  # - テナントからの除名
+  # - LINE連携の解除
+  # - Cognitoユーザーの削除
+  # id 削除するFisherUserのID
+  deleteFisherUser(id: ID!): FisherUser
+
+  # Tenantを削除する。
+  # Admin ToolでTenantを削除するために使用する。
+  # 注意: 削除前に以下の安全性チェックが実行される
+  # - 所属メンバーが存在しないこと
+  # - 進行中の事故が存在しないこと
+  # - エスカレーション設定の削除
+  # id 削除するTenantのID
+  deleteTenant(id: ID!): Tenant
+}
+
+type Subscription @aws_iam @aws_cognito_user_pools {
+  # Accidentの状況が変わったときに通知されるSubscription
+  # 注意 現在は使用されていない。将来的に実装予定。
+  # id 通知を受け取るAccidentのID
+  updatedAccident(id: ID!): Accident
+    @aws_subscribe(mutations: ["addRescuingUser", "removeRescuingUser", "setRescued", "setFalseAlarm"])
+
+  # Deviceからの信号データが送信されたときに通知されるSubscription
+  # 注意 現在は使用されていない。将来的に実装予定。
+  # id 通知を受け取るDeviceのID
+  updatedDevice(id: ID!): Device @aws_subscribe(mutations: ["sendMT825Event"])
+
+  # あるAccidentにおいて救助中のFisherUserがモバイルアプリの位置情報を送信したときに通知されるSubscription
+  # 注意 現在は使用されていない。将来的に事故画面において、救助中のFisherUserの移動の軌跡を効率よく描画するために使用する予定。
+  # accidentId 通知を受け取るAccidentのID
+  reportedRescuingUserLocation(accidentId: ID!): RescuingUserLocationEvent
+    @aws_subscribe(mutations: ["reportRescuingUserLocation"])
+}
+
+# Accident
+type Accident @aws_iam @aws_cognito_user_pools {
+  id: ID!
+  createdAt: AWSTimestamp!
+
+  # Accidentを発生させたDevice
+  sosDevice: Device!
+
+  # Accidentを発生させたDeviceの信号データ
+  # timestampの昇順で返却される
+  sosDeviceSignals: [SosDeviceSignal!]!
+
+  # Accidentの現在のステータス
+  currentStatus: AccidentStatus!
+
+  # duplicated
+  # 変わりに'tenants'フィールドを使って下さい
+  tenant: Tenant
+
+  # この事故に関連しているTenant
+  # ここに含まれるTenantのメンバーは、モバイルアプリを開くと事故画面に表示される
+  tenants: [Tenant!]!
+
+  # このAccidentに救助者として登録されているFisherUser
+  # モバイルアプリ上で「救助に向かう」ボタンを押すとここに追加される
+  # locationEventCountSumLimit 全救助者のlocationEvent合計数の上限（デフォルト 2000）
+  # latestTimestamp 取得する位置情報の最新のタイムスタンプ（デフォルト 現在時刻）
+  rescuingUsers(locationEventsCountSumLimit: Int, latestTimestamp: AWSTimestamp): [RescuingUser!]!
+
+  # 閉じられたAccidentがFisherUserの視点から確認されたかどうかのフラグ
+  # このフラグがfalseの場合、モバイルアプリを開いたときに「この事故は解決しました」というポップアップが表示される
+  # その後、ポップアップを閉じるとこのフラグがtrueになり、以降はポップアップが表示されなくなる
+  isConfirmedClosed: Boolean! @aws_cognito_user_pools
+}
+
+# Accidentのステータス
+enum AccidentStatusType {
+  # Accidentが発生中
+  OPEN
+  # 注意 恐らく現状は使われていない
+  CLOSED
+  # 救助によって解決済み
+  CLOSED_RESCUED
+  # 誤作動報告によって解決済み
+  CLOSED_FALSE_ALARM
+}
+
+type AccidentStatus @aws_iam @aws_cognito_user_pools {
+  # ステータスの種類
+  type: AccidentStatusType!
+
+  # このAccidentに救助に向かっているFisherUser
+  rescuingUsers: [FisherUser]!
+
+  # このAccidentを救助完了したFisherUser
+  rescuerUsers: [FisherUser]!
+}
+
+type AccidentPage @aws_iam @aws_cognito_user_pools {
+  accidents: [Accident!]!
+}
+
+type LocationEvent @aws_iam @aws_cognito_user_pools {
+  timestamp: AWSTimestamp!
+  location: GeoLocation!
+}
+
+type RescuingUserLocationEvent @aws_iam @aws_cognito_user_pools {
+  accidentId: ID!
+  fisherUser: FisherUser!
+  locationEvent: LocationEvent!
+}
+
+type RescuingUser @aws_iam @aws_cognito_user_pools {
+  fisherUser: FisherUser!
+
+  # 救助中のFisherUserが送信した位置情報のリスト
+  # timestampの昇順で返却される
+  locationEvents: [LocationEvent!]!
+
+  # locationEventsの中で最新のものタイムスタンプ
+  # ページネーションに利用する
+  latestLocationEventTimestamp: AWSTimestamp
+
+  # locationEventsの中で最古のもののタイムスタンプ
+  # ページネーションに利用する
+  oldestLocationEventTimestamp: AWSTimestamp
+}
+
+type SosDeviceSignal @aws_iam @aws_cognito_user_pools {
+  timestamp: AWSTimestamp!
+  latitude: Float!
+  longitude: Float!
+}
+
+# Tenant
+type Tenant @aws_iam @aws_cognito_user_pools {
+  # Tenantの住所
+  address: String
+
+  createdAt: AWSTimestamp!
+
+  id: ID!
+
+  name: String!
+
+  updatedAt: AWSTimestamp!
+
+  # このTenantに紐づくSNS TopicのARN
+  topicArn: String!
+
+  # このTenantでAccidentが発生した時のエスカレーション先のTenant
+  # 現状はここに含まれるTenantのメンバーはモバイルアプリを開くと事故画面になるが、事故発生時の緊急音通知は送信されない
+  escalatingTenants: [Tenant!]!
+
+  # このTenantのメンバー
+  members: [FisherUser!]!
+
+  # 閉じられたものも含めた、このTenantに紐づく全てのAccident
+  # 注意 結果は順不同。将来的にDynamoDBのIndexを更新してソートして返却する予定。
+  accidents: [Accident!]
+}
+
+type TenantPage @aws_iam @aws_cognito_user_pools {
+  nextToken: String
+  tenants: [Tenant!]!
+}
+
+# LinkedTenant
+type LinkedTenant @aws_iam @aws_cognito_user_pools {
+  id: ID!
+  tenantId: ID!
+  linkedTenantId: ID!
+  realtime: Boolean!
+  createdAt: AWSTimestamp!
+  createdBy: String!
+  tenant: Tenant
+}
+
+# Device
+type Device @aws_iam @aws_cognito_user_pools {
+  id: ID!
+  imei: String
+  status: DeviceStatus!
+  owner: FisherUser
+  deviceType: DeviceType!
+  registeredAt: AWSTimestamp!
+  updatedAt: AWSTimestamp!
+
+  # Deviceから送信された信号データ
+  # timestampの昇順で返却される
+  # startTimestamp 取得する最古のエポックミリ秒（デフォルト 0）
+  # endTimestamp 取得する最新のエポックミリ秒（デフォルト ∞）
+  deviceSignals(startTimestamp: AWSTimestamp, endTimestamp: AWSTimestamp): [DeviceSignal!]!
+
+  # Deviceから送信された全信号データ（sos含む）
+  # timestampの昇順で返却される
+  # startTimestamp 取得する最古のエポックミリ秒（デフォルト 0）
+  # endTimestamp 取得する最新のエポックミリ秒（デフォルト ∞）
+  deviceAllSignals(startTimestamp: AWSTimestamp, endTimestamp: AWSTimestamp): [DeviceAllSignal!]!
+}
+
+enum DeviceType {
+  MT825
+  EV_07B
+}
+
+type DeviceStatus @aws_iam @aws_cognito_user_pools {
+  batteryPercentage: Int
+  location: GeoLocation
+  sos: Boolean
+}
+
+type DevicePage @aws_iam @aws_cognito_user_pools {
+  devices: [Device!]!
+  nextToken: String
+}
+
+type DeviceSignal @aws_iam @aws_cognito_user_pools {
+  batteryPercentage: Int!
+  latitude: Float!
+  longitude: Float!
+  timestamp: AWSTimestamp!
+}
+
+# DeviceAllSignal: DeviceSignalにsosを加えた型
+type DeviceAllSignal @aws_iam @aws_cognito_user_pools {
+  batteryPercentage: Int
+  latitude: Float!
+  longitude: Float!
+  timestamp: AWSTimestamp!
+  sos: Boolean!
+}
+
+# MT825端末の信号イベントの種類
+enum MT825EventType {
+  EVENT_POWER_ON
+  EVENT_GPS_REPORT
+  EVENT_WIFI_REPORT
+  EVENT_CELL_REPORT
+  EVENT_SOS_REPORT
+  EVENT_LOW_BATTERY
+  EVENT_HEART_BEAT
+  EVENT_POWER_OFF
+  EVENT_CHARGING
+  EVENT_CHARGING_FULL
+  EVENT_POWER_ON_UNDER_POWER_SAVING_MODE
+  EVENT_POWER_OFF_UNDER_POWER_SAVING_MODE
+}
+
+# FisherUser
+type FisherUser @aws_iam @aws_cognito_user_pools {
+  id: ID!
+  name: String!
+  nickname: String
+  icon: String
+
+  # このFisherUserの暗号化済みパスワード
+  # よびもりは、パスワードを良く忘れるお客様が多いため、Admin ToolでFisherUserのパスワードを閲覧できるようにしており、
+  # そのために、よびもりシステムのDynamoDB上にパスワードを(暗号化した上で)保存する必要があり、それを実現するために (リスクを飲んで) このようにしている
+  encryptedPassword: String
+
+  # duplicated
+  # please use 'tenants' instead of this
+  tenant: Tenant
+
+  # このFisherUserが所属しているTenant
+  tenants: [Tenant!]!
+
+  # このFisherUserが所有しているDevice
+  devices: DevicePage!
+
+  createdAt: AWSTimestamp!
+  updatedAt: AWSTimestamp!
+
+  # このFisherUserに紐づくLINEユーザー
+  # このFisherUserがAccidentを起こすと、紐づいているLINEユーザーにLINEで通知が送信される
+  lineUsers: [LineUser!]
+}
+
+type LineUser @aws_iam @aws_cognito_user_pools {
+  # LINEユーザーID
+  userId: String!
+  # LINEユーザーの表示名
+  displayName: String
+  # LINEユーザーのトップ画像のURL
+  pictureUrl: String
+}
+
+type AppDevice @aws_iam @aws_cognito_user_pools {
+  id: ID!
+  deviceId: ID!
+  ownerId: ID!
+  info: AppDeviceInfo!
+}
+
+type AppDeviceInfo @aws_iam @aws_cognito_user_pools {
+  notificationToken: String
+  os: AppDeviceOS
+  osVersion: String
+  model: String
+  endpointArn: String
+}
+
+enum AppDeviceOS {
+  IOS
+  Android
+}
+
+type AppDeviceLocationEvent @aws_iam @aws_cognito_user_pools {
+  fisherUser: FisherUser!
+  locationEvent: LocationEvent!
+}
+
+input RegisterAppDeviceInput {
+  deviceId: ID!
+  ownerId: ID # Cognitoで認証されている場合は無視される
+  info: AppDeviceInfoInput!
+}
+
+input DeregisterAppDeviceInput {
+  deviceId: ID!
+  ownerId: ID # Cognitoで認証されている場合は無視される
+}
+
+input AppDeviceInfoInput {
+  notificationToken: String
+  os: AppDeviceOS
+  osVersion: String
+  model: String
+}
+
+type GeoLocation @aws_iam @aws_cognito_user_pools {
+  latitude: Float!
+  longitude: Float!
+}
+
+input GeoLocationInput {
+  latitude: Float!
+  longitude: Float!
+}
+
+# Notification
+input NotificationInput {
+  # Push通知のタイトル
+  title: String!
+  # Push通知の本文
+  body: String!
+  # 緊急音を鳴らすかどうか
+  isAlert: Boolean
+}
+
+input LineMessageInput {
+  text: String!
+}
+
+type SendNotificationToSpecificLocationResponse {
+  # 通知を受け取った人数
+  recipient: Int!
+}
+
+scalar AWSTimestamp
+directive @aws_iam on OBJECT | FIELD_DEFINITION
+directive @aws_cognito_user_pools(cognito_groups: [String]) on OBJECT | FIELD_DEFINITION
+directive @aws_subscribe(mutations: [String]) on FIELD_DEFINITION

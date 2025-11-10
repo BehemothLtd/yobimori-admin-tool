@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, type VNode } from "vue";
 
 export interface TableColumn {
   key: string;
@@ -8,7 +8,7 @@ export interface TableColumn {
   width?: string;
   sortable?: boolean;
   align?: "left" | "center" | "right";
-  render?: (row: any) => string;
+  render?: (row: any) => string | VNode;
 }
 
 interface Props {
@@ -177,9 +177,15 @@ const getAlignClass = (align?: string) => {
               ]"
             >
               <!-- Text -->
-              <span v-if="!column.type || column.type === 'text'">
-                {{ getCellValue(row, column) }}
-              </span>
+              <template v-if="!column.type || column.type === 'text'">
+                <component
+                  v-if="typeof getCellValue(row, column) === 'object'"
+                  :is="getCellValue(row, column)"
+                />
+                <span v-else>
+                  {{ getCellValue(row, column) }}
+                </span>
+              </template>
 
               <!-- Image -->
               <img

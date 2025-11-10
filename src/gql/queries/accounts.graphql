@@ -1,0 +1,88 @@
+query GetFisherUserById($id: ID!) {
+  getFisherUserById(id: $id) {
+    id
+    name
+    nickname
+    icon
+    encryptedPassword
+    createdAt
+    updatedAt
+    tenants {
+      id
+      name
+      address
+    }
+    devices {
+      devices {
+        id
+        imei
+        deviceType
+        registeredAt
+      }
+      nextToken
+    }
+    lineUsers {
+      userId
+      displayName
+      pictureUrl
+    }
+  }
+}
+
+query GetFisherUserByName($name: String!) {
+  getFisherUserByName(name: $name) {
+    id
+    name
+    nickname
+    icon
+    encryptedPassword
+    createdAt
+    updatedAt
+    tenants {
+      id
+      name
+    }
+  }
+}
+
+mutation UpdateFisherUserNickname($id: ID, $nickname: String) {
+  updateFisherUserNickname(id: $id, nickname: $nickname) {
+    id
+    nickname
+    updatedAt
+  }
+}
+
+mutation UpdateFisherUserPassword($id: ID, $password: String) {
+  updateFisherUserPasswordWithEncryption(id: $id, password: $password) {
+    id
+    encryptedPassword
+    updatedAt
+  }
+}
+
+mutation SetTenant($userId: ID!, $tenantId: ID!, $isNotPrimary: Boolean) {
+  setTenant(userId: $userId, tenantId: $tenantId, isNotPrimary: $isNotPrimary) {
+    id
+    tenants {
+      id
+      name
+    }
+    updatedAt
+  }
+}
+
+mutation CreateFisherUser($id: ID!, $name: String!) {
+  createFisherUser(id: $id, name: $name) {
+    id
+    name
+    createdAt
+  }
+}
+
+mutation DeleteFisherUser($id: ID!) {
+  deleteFisherUser(id: $id) {
+    id
+    name
+  }
+}

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import MainLayout from "@/components/MainLayout.vue";
 import {
@@ -9,17 +9,16 @@ import {
   TextField,
   SearchForm,
   DataTable,
+  LoadingSpinner,
   type TableColumn,
 } from "@/components/base";
 import BusinessIcon from "@/components/icons/BusinessIcon.vue";
 import SearchIcon from "@/components/icons/SearchIcon.vue";
-
-interface Tenant {
-  id: string;
-  name: string;
-}
+import useTenants from "@/composable/useTenants";
+import type { Tenant } from "@/types/tenant";
 
 const router = useRouter();
+const { getTenants, isLoading } = useTenants();
 
 // Breadcrumb data
 const breadcrumbItems = [
@@ -27,24 +26,15 @@ const breadcrumbItems = [
   { label: "テナント管理" },
 ];
 
-// Mock data
-const tenantsData = ref<Tenant[]>([
-  {
-    id: "d665f4b8-7334-48a6-a6d3-3e00258fd613",
-    name: "test-tenant-20230102105523.41",
-  },
-  {
-    id: "6c981d3b-6752-4cab-8d55-273fa3e268a6",
-    name: "test-from-tenant-20230513104307.587863982-04c8c83d-b412-4c4e-86de-7ea4cbaa3327",
-  },
-  {
-    id: "760c1dfb-abbb-49f1-9497-3f5721db42b3",
-    name: "test-tenant-20230110231344.42",
-  },
-]);
-
-// Search form
+// Data
+const tenantsData = ref<Tenant[]>([]);
 const searchQuery = ref("");
+
+// Fetch tenants from API
+const fetchTenantsData = async () => {
+  const { tenants } = await getTenants({ excludeTest: true });
+  tenantsData.value = tenants;
+};
 
 // Filter data based on search
 const filteredTenants = computed(() => {
@@ -97,6 +87,11 @@ const handleRowClick = (row: Tenant) => {
 const handleCellButtonClick = (row: Tenant) => {
   router.push(`/tenants/${row.id}`);
 };
+
+// Fetch tenants on mount
+onMounted(() => {
+  fetchTenantsData();
+});
 </script>
 
 <template>
@@ -132,8 +127,12 @@ const handleCellButtonClick = (row: Tenant) => {
       </template>
     </SearchForm>
 
+    <!-- Loading State -->
+    <LoadingSpinner v-if="isLoading" />
+
     <!-- Data Table -->
     <DataTable
+      v-else
       :columns="columns"
       :data="filteredTenants"
       @row-click="handleRowClick"
@@ -142,7 +141,7 @@ const handleCellButtonClick = (row: Tenant) => {
     />
 
     <!-- Results Info -->
-    <div class="mt-4 text-sm text-gray-600">
+    <div v-if="!isLoading" class="mt-4 text-sm text-gray-600">
       {{ filteredTenants.length }} 件のテナントが見つかりました
     </div>
   </MainLayout>
