@@ -14,7 +14,12 @@ const handleLogout = () => {
         <div class="flex items-center justify-between h-16">
           <!-- Logo / Title -->
           <div class="flex items-center">
-            <h1 class="text-2xl font-bold text-white">Yobimori Admin Tool</h1>
+            <router-link
+              to="/"
+              class="text-2xl font-bold text-white hover:text-white"
+            >
+              Yobimori Admin Tool
+            </router-link>
           </div>
 
           <!-- Logout Button -->

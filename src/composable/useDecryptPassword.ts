@@ -1,5 +1,6 @@
 import { DecryptCommand } from "@aws-sdk/client-kms";
 import { getKmsClient } from "@/infra/crypto/client";
+import { Buffer } from "buffer";
 
 /**
  * Composable for decrypting passwords using AWS KMS
