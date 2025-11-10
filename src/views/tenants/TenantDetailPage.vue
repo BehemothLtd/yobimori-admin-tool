@@ -240,11 +240,6 @@ onMounted(async () => {
         :description="tenant.name"
         :icon="BusinessIcon"
       >
-        <template #actions>
-          <BaseButton variant="secondary" @click="handleBack">
-            戻る
-          </BaseButton>
-        </template>
       </PageHeader>
 
       <!-- Tenant Details Card -->

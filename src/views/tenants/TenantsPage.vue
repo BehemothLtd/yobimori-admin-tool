@@ -13,7 +13,6 @@ import {
   type TableColumn,
 } from "@/components/base";
 import BusinessIcon from "@/components/icons/BusinessIcon.vue";
-import SearchIcon from "@/components/icons/SearchIcon.vue";
 import useTenants from "@/composable/useTenants";
 import type { Tenant } from "@/types/tenant";
 
@@ -54,12 +53,12 @@ const columns: TableColumn[] = [
     key: "id",
     label: "テナントID",
     width: "350px",
-    sortable: true,
+    sortable: false,
   },
   {
     key: "name",
     label: "テナント名",
-    sortable: true,
+    sortable: false,
   },
   {
     key: "action",
@@ -72,8 +71,8 @@ const columns: TableColumn[] = [
 ];
 
 // Handlers
-const handleSearch = () => {
-  console.log("Searching for:", searchQuery.value);
+const handleCreateTenant = () => {
+  router.push("/tenants/new");
 };
 
 const handleReset = () => {
@@ -118,8 +117,8 @@ onMounted(() => {
         />
       </template>
       <template #actions>
-        <BaseButton variant="primary" :icon="SearchIcon" @click="handleSearch">
-          検索
+        <BaseButton variant="primary" @click="handleCreateTenant">
+          テナント作成
         </BaseButton>
         <BaseButton variant="secondary" @click="handleReset">
           リセット

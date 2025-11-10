@@ -6,6 +6,7 @@ import {
   GetTenantWithMembersDocument,
   GetLinkedTenantsDocument,
   UpdateTenantDocument,
+  CreateTenantDocument,
   CreateTenantLinkDocument,
   UpdateTenantLinkDocument,
   DeleteTenantLinkDocument,
@@ -14,6 +15,7 @@ import {
   type GetTenantWithMembersQuery,
   type GetLinkedTenantsQuery,
   type UpdateTenantMutation,
+  type CreateTenantMutation,
   type CreateTenantLinkMutation,
   type UpdateTenantLinkMutation,
   type DeleteTenantLinkMutation,
@@ -163,6 +165,30 @@ export default function useTenants() {
   };
 
   /**
+   * Create new tenant
+   */
+  const createTenant = async (params: {
+    name: string;
+    address?: string;
+  }): Promise<Tenant | null> => {
+    const result = await mutate<CreateTenantMutation>(CreateTenantDocument, {
+      variables: params,
+    });
+
+    if (result?.createTenant) {
+      return {
+        id: result.createTenant.id,
+        name: result.createTenant.name,
+        address: result.createTenant.address || "",
+        createdAt: result.createTenant.createdAt,
+        updatedAt: result.createTenant.updatedAt,
+      };
+    }
+
+    return null;
+  };
+
+  /**
    * Create linked tenant
    */
   const createTenantLink = async (params: {
@@ -294,6 +320,7 @@ export default function useTenants() {
     getTenantWithMembers,
     getLinkedTenants,
     updateTenant,
+    createTenant,
     createTenantLink,
     updateTenantLink,
     deleteTenantLink,

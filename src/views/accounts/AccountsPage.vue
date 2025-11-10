@@ -65,12 +65,12 @@ const columns: TableColumn[] = [
   {
     key: "name",
     label: "ユーザーID",
-    sortable: true,
+    sortable: false,
   },
   {
     key: "nickname",
     label: "ユーザー名",
-    sortable: true,
+    sortable: false,
   },
   {
     key: "password",
