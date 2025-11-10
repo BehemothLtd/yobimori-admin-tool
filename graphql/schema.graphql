@@ -68,7 +68,7 @@ type Query @aws_iam @aws_cognito_user_pools {
   # 全てのTenantを取得する。
   # Admin ToolでTenantの一覧を表示するために使用する。
   # limit 取得する件数の上限
-  getTenants(limit: Int, nextToken: String): TenantPage
+  getTenants(limit: Int, nextToken: String, nameCont: String): TenantPage
 
   # LinkedTenant queries
   # Get linked tenants for a specific tenant.

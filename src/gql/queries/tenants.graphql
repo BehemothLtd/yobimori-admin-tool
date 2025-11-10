@@ -1,5 +1,5 @@
-query GetTenants($limit: Int, $nextToken: String) {
-  getTenants(limit: $limit, nextToken: $nextToken) {
+query GetTenants($limit: Int, $nextToken: String, $nameCont: String) {
+  getTenants(limit: $limit, nextToken: $nextToken, nameCont: $nameCont) {
     tenants {
       id
       name

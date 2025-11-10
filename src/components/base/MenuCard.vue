@@ -15,7 +15,7 @@ defineProps<Props>();
     :class="[
       'block p-4 sm:p-6 rounded-lg border-2 transition-all duration-300',
       enabled
-        ? 'border-gray-200 bg-white hover:border-[#ff8a65] hover:shadow-xl hover:-translate-y-1 cursor-pointer'
+        ? 'border-gray-200 bg-white hover:border-primary hover:shadow-xl hover:-translate-y-1 cursor-pointer'
         : 'border-gray-100 bg-gray-50 opacity-60 cursor-not-allowed',
     ]"
     :aria-disabled="!enabled"
@@ -25,7 +25,7 @@ defineProps<Props>();
       <div
         :class="[
           'transition-colors duration-300',
-          enabled ? 'text-[#ff8a65]' : 'text-gray-400',
+          enabled ? 'text-primary' : 'text-gray-400',
         ]"
       >
         <slot name="icon"></slot>

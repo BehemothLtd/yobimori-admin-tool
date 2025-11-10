@@ -17,6 +17,34 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Ant Design custom theme colors */
+.ant-pagination-item-active {
+  border-color: #ef654d !important;
+  background: linear-gradient(135deg, #ef654d 0%, #ff8a65 100%) !important;
+}
+
+.ant-pagination-item-active a {
+  color: #fff !important;
+}
+
+.ant-pagination-item:hover {
+  border-color: #ef654d !important;
+}
+
+.ant-pagination-item:hover a {
+  color: #ef654d !important;
+}
+
+.ant-btn-primary {
+  background: linear-gradient(135deg, #ef654d 0%, #ff8a65 100%) !important;
+  border-color: #ef654d !important;
+}
+
+.ant-btn-primary:hover {
+  background: linear-gradient(135deg, #d65644 0%, #f57a58 100%) !important;
+  border-color: #d65644 !important;
+}
+
 a {
   font-weight: 500;
   color: #646cff;

@@ -33,6 +33,7 @@ export default function useTenants() {
   const getTenants = async (params?: {
     limit?: number;
     nextToken?: string | null;
+    nameCont?: string;
     excludeTest?: boolean;
   }): Promise<{ tenants: Tenant[]; nextToken: string | null }> => {
     isLoading.value = true;
@@ -40,8 +41,9 @@ export default function useTenants() {
     try {
       const result = await query<GetTenantsQuery>(GetTenantsDocument, {
         variables: {
-          limit: params?.limit || 10000,
+          limit: params?.limit || 30,
           nextToken: params?.nextToken || null,
+          nameCont: params?.nameCont || null,
         },
       });
 
@@ -58,18 +60,19 @@ export default function useTenants() {
 
         // Filter out test tenants if needed
         if (params?.excludeTest) {
-          tenants = tenants.filter((tenant) => {
-            if (
-              tenant.name.includes("test") ||
-              tenant.name.includes("to-tenant-") ||
-              tenant.name.includes("from-tenant-") ||
-              tenant.name.includes("to-tenant2-") ||
-              tenant.name.includes("to-tenant2nd")
-            ) {
-              return false;
-            }
-            return true;
-          });
+          // tenants = tenants.filter((tenant) => {
+          //   if (
+          //     tenant.name.includes("test")
+          //     // ||
+          //     // tenant.name.includes("to-tenant-") ||
+          //     // tenant.name.includes("from-tenant-") ||
+          //     // tenant.name.includes("to-tenant2-") ||
+          //     // tenant.name.includes("to-tenant2nd")
+          //   ) {
+          //     return false;
+          //   }
+          //   return true;
+          // });
         }
 
         return {

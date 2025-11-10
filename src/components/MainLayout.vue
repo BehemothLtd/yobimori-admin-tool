@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from "vue";
+import { MenuOutlined, LogoutOutlined } from "@ant-design/icons-vue";
 import DrawerMenu from "./DrawerMenu.vue";
 
 const isDrawerOpen = ref(false);
@@ -40,7 +41,7 @@ const handleLogout = () => {
     <DrawerMenu :is-open="isDrawerOpen" @close="closeDrawer" />
 
     <!-- Header - Fixed at top, full width -->
-    <header class="flex-shrink-0 bg-[#ff8a65] shadow-lg z-30">
+    <header class="flex-shrink-0 bg-[#ef654d] shadow-lg z-30">
       <div class="w-full px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-16">
           <!-- Left side: Menu button (mobile) + Logo -->
@@ -49,23 +50,10 @@ const handleLogout = () => {
             <button
               v-if="isMobile"
               @click="toggleDrawer"
-              class="p-2 rounded-lg bg-[#ff8a65] text-white focus:outline-none focus:ring-2 focus:ring-white/50 transition-all duration-200"
-              background-color="#ff8a65"
+              class="p-2 rounded-lg bg-[#ef654d] text-white focus:outline-none focus:ring-2 focus:ring-white/50 transition-all duration-200"
               aria-label="Open menu"
             >
-              <svg
-                class="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M4 6h16M4 12h16M4 18h16"
-                />
-              </svg>
+              <MenuOutlined class="text-xl" />
             </button>
 
             <!-- Logo / Title -->
@@ -83,20 +71,7 @@ const handleLogout = () => {
               @click="handleLogout"
               class="inline-flex items-center px-3 sm:px-4 py-2 border border-white/30 text-sm font-medium rounded-md text-white bg-white/20 hover:bg-white/30 focus:outline-none focus:ring-2 focus:ring-white/50 transition-all duration-200 backdrop-blur-sm"
             >
-              <svg
-                class="w-5 h-5 sm:mr-2"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                />
-              </svg>
+              <LogoutOutlined class="text-base sm:mr-2" />
               <span class="hidden sm:inline">ログアウト</span>
             </button>
           </div>

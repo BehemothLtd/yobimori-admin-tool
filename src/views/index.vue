@@ -19,13 +19,6 @@ interface MenuItem {
 
 const menuItems = ref<MenuItem[]>([
   {
-    href: "/accounts",
-    title: "アカウント・デバイス管理",
-    description: "ユーザー・テナントの情報を確認したり変更できます",
-    icon: "AccountBoxIcon",
-    enabled: true,
-  },
-  {
     href: "/tenants",
     title: "テナント管理",
     description: "テナントの詳細情報や設定を管理できます",

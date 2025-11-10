@@ -242,6 +242,16 @@ onMounted(async () => {
       >
       </PageHeader>
 
+      <!-- Action Buttons -->
+      <div class="mb-6 flex justify-end gap-3">
+        <BaseButton
+          variant="primary"
+          @click="router.push(`/tenants/${tenant.id}/accounts`)"
+        >
+          アカウント一覧
+        </BaseButton>
+      </div>
+
       <!-- Tenant Details Card -->
       <div class="w-full bg-white rounded-lg shadow-md p-4 sm:p-6 mb-6">
         <h3

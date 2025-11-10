@@ -29,17 +29,17 @@ const gridClass = computed(() => {
 </script>
 
 <template>
-  <div class="bg-white rounded-lg shadow-md p-4 sm:p-6 mb-6">
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-4">
     <!-- Search Fields -->
     <div
-      :class="['gap-4 mb-4', layout === 'row' ? gridClass : 'flex flex-col']"
+      :class="['gap-3 mb-3', layout === 'row' ? gridClass : 'flex flex-col']"
     >
       <slot name="fields"></slot>
     </div>
 
     <!-- Action Buttons -->
     <div
-      class="flex flex-wrap items-center gap-3 pt-4 border-t border-gray-200"
+      class="flex flex-wrap items-center gap-2 pt-3 border-t border-gray-100"
     >
       <slot name="actions"></slot>
     </div>

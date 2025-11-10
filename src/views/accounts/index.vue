@@ -1,13 +1,12 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, h } from "vue";
-import { useRouter } from "vue-router";
+import { useRouter, useRoute } from "vue-router";
 import MainLayout from "@/components/MainLayout.vue";
 import {
   Breadcrumb,
   PageHeader,
   BaseButton,
   TextField,
-  SelectField,
   SearchForm,
   DataTable,
   LoadingSpinner,
@@ -21,32 +20,47 @@ import type { Tenant } from "@/types/tenant";
 import type { FisherUser as Account } from "@/types/account";
 
 const router = useRouter();
-const { getTenants, getTenantWithMembers } = useTenants();
+const route = useRoute();
+const { getTenantWithMembers } = useTenants();
 const { decryptPassword } = useDecryptPassword();
 
-// Breadcrumb data
-const breadcrumbItems = [
-  { label: "ホーム", to: "/" },
-  { label: "アカウント・デバイス管理" },
-];
+// Get tenantId from route params
+const tenantId = computed(() => route.params.id as string);
 
+console.log("tenant id", tenantId.value);
 // State
-const tenantsData = ref<Tenant[]>([]);
-const selectedTenantId = ref("");
+const currentTenant = ref<Tenant | null>(null);
 const filterText = ref("");
 const accounts = ref<Account[]>([]);
 const isLoading = ref(false);
 
-// Load tenants on mount (filter out test tenants)
-onMounted(async () => {
-  const result = await getTenants({ excludeTest: true });
-  tenantsData.value = result.tenants;
-});
+// Breadcrumb data
+const breadcrumbItems = computed(() => [
+  { label: "ホーム", to: "/" },
+  { label: "テナント管理", to: "/tenants" },
+  {
+    label: currentTenant.value?.name || "テナント詳細",
+    to: `/tenants/${tenantId.value}`,
+  },
+  { label: "アカウント・デバイス管理" },
+]);
 
-// Tenant options for select
-const tenantOptions = computed(() =>
-  tenantsData.value.map((t) => ({ value: t.id, label: t.name }))
-);
+// Load tenant data and members on mount
+onMounted(async () => {
+  if (!tenantId.value) return;
+
+  isLoading.value = true;
+
+  try {
+    const { tenant, members } = await getTenantWithMembers(tenantId.value);
+    currentTenant.value = tenant;
+    accounts.value = members;
+  } catch (error) {
+    console.error("Failed to load tenant data:", error);
+  } finally {
+    isLoading.value = false;
+  }
+});
 
 // Filter accounts based on filterText
 const filteredAccounts = computed(() => {
@@ -115,25 +129,6 @@ const columns: TableColumn[] = [
 ];
 
 // Handlers
-const handleTenantChange = async () => {
-  if (!selectedTenantId.value) {
-    accounts.value = [];
-    return;
-  }
-
-  isLoading.value = true;
-
-  try {
-    const { members } = await getTenantWithMembers(selectedTenantId.value);
-    accounts.value = members;
-  } catch (error) {
-    console.error("Failed to load tenant members:", error);
-    accounts.value = [];
-  } finally {
-    isLoading.value = false;
-  }
-};
-
 const handleReset = () => {
   filterText.value = "";
 };
@@ -145,10 +140,6 @@ const handleCellButtonClick = (row: Account) => {
 
 // Result count message
 const resultMessage = computed(() => {
-  if (!selectedTenantId.value) {
-    return "";
-  }
-
   if (filterText.value) {
     return `「${filterText.value}」の検索結果: ${filteredAccounts.value.length}件`;
   }
@@ -172,21 +163,12 @@ const resultMessage = computed(() => {
     />
 
     <!-- Search Form -->
-    <SearchForm :columns="2">
+    <SearchForm :columns="1">
       <template #fields>
-        <SelectField
-          v-model="selectedTenantId"
-          label="テナント"
-          :options="tenantOptions"
-          placeholder="テナントを選択してください"
-          required
-          @change="handleTenantChange"
-        />
         <TextField
           v-model="filterText"
           label="ユーザー名"
           placeholder="ユーザー名で検索"
-          :disabled="!selectedTenantId"
         />
       </template>
       <template #actions>
