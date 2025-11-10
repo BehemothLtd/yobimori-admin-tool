@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { useRouter, useRoute } from "vue-router";
+import { signOut } from "aws-amplify/auth";
 import {
   HomeOutlined,
   ShopOutlined,
   CloseOutlined,
   LogoutOutlined,
 } from "@ant-design/icons-vue";
+import useSwal from "@/composable/useSwal";
 
 interface MenuItem {
   href: string;
@@ -25,6 +27,7 @@ defineProps<Props>();
 const emit = defineEmits<Emits>();
 const router = useRouter();
 const route = useRoute();
+const { success, error } = useSwal();
 
 const menuItems: MenuItem[] = [
   {
@@ -50,10 +53,19 @@ const handleNavigation = (href: string) => {
   emit("close");
 };
 
-const handleLogout = () => {
-  console.log("Logout clicked");
-  alert("ログアウトしました");
-  emit("close");
+const handleLogout = async () => {
+  try {
+    await signOut();
+    emit("close");
+    await success({ title: "ログアウトしました" });
+    // Redirect to home or login page
+    router.push("/");
+    // Reload to clear any cached data
+    window.location.reload();
+  } catch (err) {
+    console.error("Logout error:", err);
+    await error({ title: "ログアウトに失敗しました" });
+  }
 };
 </script>
 

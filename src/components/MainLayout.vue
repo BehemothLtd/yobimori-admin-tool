@@ -1,8 +1,13 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from "vue";
-import { MenuOutlined, LogoutOutlined } from "@ant-design/icons-vue";
+import { useRouter } from "vue-router";
+import { LogoutOutlined } from "@ant-design/icons-vue";
+import { signOut } from "aws-amplify/auth";
 import DrawerMenu from "./DrawerMenu.vue";
+import useSwal from "@/composable/useSwal";
 
+const router = useRouter();
+const { success, error } = useSwal();
 const isDrawerOpen = ref(false);
 const isMobile = ref(false);
 
@@ -27,9 +32,18 @@ const closeDrawer = () => {
   isDrawerOpen.value = false;
 };
 
-const handleLogout = () => {
-  console.log("Logout clicked");
-  alert("ログアウトしました");
+const handleLogout = async () => {
+  try {
+    await signOut();
+    await success({ title: "ログアウトしました" });
+    // Redirect to home or login page
+    router.push("/");
+    // Reload to clear any cached data
+    window.location.reload();
+  } catch (err) {
+    console.error("Logout error:", err);
+    await error({ title: "ログアウトに失敗しました" });
+  }
 };
 </script>
 
@@ -46,22 +60,36 @@ const handleLogout = () => {
         <div class="flex items-center justify-between h-16">
           <!-- Left side: Menu button (mobile) + Logo -->
           <div class="flex items-center gap-3">
-            <!-- Hamburger Menu Button - Only on mobile -->
+            <!-- Logo as Menu Trigger - Mobile -->
             <button
               v-if="isMobile"
               @click="toggleDrawer"
-              class="p-2 rounded-lg bg-[#ef654d] text-white focus:outline-none focus:ring-2 focus:ring-white/50 transition-all duration-200"
+              class="p-1.5 rounded-full bg-white shadow-md focus:outline-none focus:ring-2 focus:ring-white/50 transition-all duration-200"
               aria-label="Open menu"
             >
-              <MenuOutlined class="text-xl" />
+              <img
+                src="@/assets/yobimori.png"
+                alt="Yobimori Logo"
+                class="h-8 w-8 object-contain"
+              />
             </button>
 
-            <!-- Logo / Title -->
+            <!-- Logo + Title - Desktop -->
             <router-link
+              v-else
               to="/"
-              class="text-xl sm:text-2xl font-bold text-white hover:text-white/90 transition-colors"
+              class="flex items-center gap-3 hover:opacity-90 transition-opacity"
             >
-              Yobimori Admin Tool
+              <div class="bg-white rounded-full p-1.5 shadow-md">
+                <img
+                  src="@/assets/yobimori.png"
+                  alt="Yobimori Logo"
+                  class="h-8 w-8 object-contain"
+                />
+              </div>
+              <span class="text-xl sm:text-2xl font-bold text-white">
+                Yobimori Admin Tool
+              </span>
             </router-link>
           </div>
 
