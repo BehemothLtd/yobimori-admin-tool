@@ -30,3 +30,4 @@ src/gql/generated/
 *.njsproj
 *.sln
 *.sw?
+.vercel

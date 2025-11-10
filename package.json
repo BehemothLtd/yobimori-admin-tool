@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vue-tsc -b && vite build",
+    "build": "npm run gql:gen && vue-tsc -b && vite build",
     "preview": "vite preview",
     "gql:gen": "graphql-code-generator --config ./graphql/codegen.ts --verbose",
     "gql:watch": "graphql-code-generator --config ./graphql/codegen.ts --watch"
