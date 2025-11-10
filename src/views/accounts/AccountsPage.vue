@@ -95,7 +95,8 @@ const columns: TableColumn[] = [
     key: "devices",
     label: "所持デバイス",
     render: (row: Account) =>
-      row.devices.devices.map((d) => d.imei).join(", ") || "-",
+      row.devices.devices.map((d) => `${d.imei}(${d.deviceType})`).join(", ") ||
+      "-",
   },
   {
     key: "lineUsers",
