@@ -28,12 +28,14 @@ defineProps<Props>();
 
         <!-- Title and Description -->
         <div class="flex-1 min-w-0">
-          <h1 class="text-start text-xl sm:text-2xl font-bold text-white">
+          <h1
+            class="text-start text-xl sm:text-2xl font-bold text-white break-words overflow-hidden"
+          >
             {{ title }}
           </h1>
           <p
             v-if="description"
-            class="text-start text-sm text-white/90 mt-1 mb-0"
+            class="text-start text-sm text-white/90 mt-1 mb-0 break-words overflow-hidden"
           >
             {{ description }}
           </p>

@@ -21,6 +21,43 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Global text wrapping rules for all text elements */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+span,
+div,
+td,
+th,
+label,
+a,
+li {
+  /* Break long words and URLs */
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  word-break: break-word;
+
+  /* Allow text to wrap naturally */
+  white-space: normal;
+
+  /* Better hyphenation for long words */
+  hyphens: auto;
+  -webkit-hyphens: auto;
+  -ms-hyphens: auto;
+}
+
+/* Prevent overflow specifically for inline and inline-block elements */
+span,
+a,
+label {
+  display: inline-block;
+  max-width: 100%;
+}
+
 /* Ant Design custom theme colors */
 .ant-pagination-item-active {
   border-color: #ef654d !important;

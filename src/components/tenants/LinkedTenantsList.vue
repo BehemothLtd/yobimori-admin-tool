@@ -100,12 +100,10 @@ const handleCreateLinkedTenant = (
         <!-- Card Header -->
         <div class="flex items-start justify-between mb-3">
           <div class="flex-1">
-            <h4
-              class="flex items-start text-base font-semibold text-gray-900 mb-1"
-            >
+            <h4 class="text-start text-base font-semibold text-gray-900 mb-1">
               {{ linkedTenant.tenant.name }}
             </h4>
-            <p class="flex items-start text-sm text-gray-600">
+            <p class="text-start text-sm text-gray-600">
               {{ linkedTenant.tenant.address }}
             </p>
           </div>

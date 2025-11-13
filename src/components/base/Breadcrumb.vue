@@ -10,6 +10,12 @@ interface Props {
 }
 
 defineProps<Props>();
+
+// Truncate label to max 50 characters with ellipsis
+const truncateLabel = (label: string, maxLength: number = 50): string => {
+  if (label.length <= maxLength) return label;
+  return label.substring(0, maxLength) + "...";
+};
 </script>
 
 <template>
@@ -63,7 +69,12 @@ defineProps<Props>();
           v-html="item.icon"
           class="w-4 h-4 flex-shrink-0"
         ></span>
-        <span class="break-words">{{ item.label }}</span>
+        <span
+          class="text-start break-words max-w-[300px] truncate inline-block"
+          :title="item.label"
+        >
+          {{ truncateLabel(item.label) }}
+        </span>
       </component>
     </template>
   </nav>
