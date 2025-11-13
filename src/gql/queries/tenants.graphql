@@ -127,9 +127,9 @@ mutation CreateTenant($name: String!, $address: String) {
   }
 }
 
-mutation DeleteTenant($id: ID!) {
-  deleteTenant(id: $id) {
-    id
-    name
-  }
-}
+# mutation DeleteTenant($id: ID!) {
+#   deleteTenant(id: $id) {
+#     id
+#     name
+#   }
+# }

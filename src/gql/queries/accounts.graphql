@@ -80,9 +80,9 @@ mutation CreateFisherUser($id: ID!, $name: String!) {
   }
 }
 
-mutation DeleteFisherUser($id: ID!) {
-  deleteFisherUser(id: $id) {
-    id
-    name
-  }
-}
+# mutation DeleteFisherUser($id: ID!) {
+#   deleteFisherUser(id: $id) {
+#     id
+#     name
+#   }
+# }

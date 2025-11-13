@@ -13,6 +13,12 @@ import {
   type TableColumn,
 } from "@/components/base";
 import BusinessIcon from "@/components/icons/BusinessIcon.vue";
+import TenantCard from "@/components/tenants/TenantCard.vue";
+import {
+  AppstoreOutlined,
+  UnorderedListOutlined,
+  PlusOutlined,
+} from "@ant-design/icons-vue";
 import useTenants from "@/composable/useTenants";
 import type { Tenant } from "@/types/tenant";
 
@@ -35,6 +41,9 @@ const nextToken = ref<string | null>(null);
 const tokenHistory = ref<(string | null)[]>([null]); // Track tokens for each page
 const totalCount = ref(0);
 const hasMore = ref(false);
+
+// View mode: 'list' or 'grid'
+const viewMode = ref<"list" | "grid">("grid");
 
 // Fetch tenants from API
 const fetchTenantsData = async (
@@ -162,24 +171,74 @@ onMounted(() => {
       </template>
     </SearchForm>
 
-    <div class="flex justify-end mb-4">
-      <BaseButton variant="primary" @click="handleCreateTenant">
-        テナント作成
-      </BaseButton>
+    <div class="flex justify-between items-center mb-6">
+      <!-- View Mode Toggle -->
+      <div class="flex gap-2">
+        <a-button
+          :type="viewMode === 'list' ? 'primary' : 'default'"
+          size="large"
+          @click="viewMode = 'list'"
+          class="view-toggle-btn"
+        >
+          <UnorderedListOutlined class="text-lg" />
+          <span class="button-text">リスト表示</span>
+        </a-button>
+        <a-button
+          :type="viewMode === 'grid' ? 'primary' : 'default'"
+          size="large"
+          @click="viewMode = 'grid'"
+          class="view-toggle-btn"
+        >
+          <AppstoreOutlined class="text-lg" />
+          <span class="button-text">グリッド表示</span>
+        </a-button>
+      </div>
+
+      <!-- Create Button -->
+      <a-button
+        type="primary"
+        size="large"
+        @click="handleCreateTenant"
+        class="create-btn"
+      >
+        <PlusOutlined class="text-lg" />
+        <span class="button-text">テナント作成</span>
+      </a-button>
     </div>
 
     <!-- Loading State -->
     <LoadingSpinner v-if="isLoading" />
 
-    <!-- Data Table -->
+    <!-- List View (Table) -->
     <DataTable
-      v-else
+      v-else-if="viewMode === 'list'"
       :columns="columns"
       :data="tenantsData"
       @row-click="handleRowClick"
       @cell-button-click="handleCellButtonClick"
       empty-text="テナントが見つかりません"
     />
+
+    <!-- Grid View (Cards) -->
+    <div v-else-if="viewMode === 'grid'">
+      <a-row :gutter="[24, 24]" v-if="tenantsData.length > 0">
+        <a-col
+          v-for="tenant in tenantsData"
+          :key="tenant.id"
+          :xs="24"
+          :sm="12"
+          :lg="8"
+        >
+          <TenantCard :tenant="tenant" @click="handleRowClick" />
+        </a-col>
+      </a-row>
+      <div
+        v-else
+        class="text-center py-16 bg-gray-50 rounded-xl border-2 border-dashed border-gray-300"
+      >
+        <p class="text-gray-600 text-lg">テナントが見つかりません</p>
+      </div>
+    </div>
 
     <!-- Pagination -->
     <div v-if="!isLoading && !searchQuery" class="mt-4 flex justify-center">
@@ -199,3 +258,32 @@ onMounted(() => {
     </div>
   </MainLayout>
 </template>
+
+<style scoped>
+.view-toggle-btn,
+.create-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.view-toggle-btn :deep(.anticon),
+.create-btn :deep(.anticon) {
+  font-size: 18px;
+}
+
+.button-text {
+  margin-left: 8px;
+}
+
+@media (max-width: 767px) {
+  .button-text {
+    display: none;
+  }
+
+  .view-toggle-btn :deep(.anticon),
+  .create-btn :deep(.anticon) {
+    margin: 0 !important;
+  }
+}
+</style>

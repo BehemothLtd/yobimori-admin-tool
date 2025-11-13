@@ -1,0 +1,37 @@
+# Statistics Queries for Dashboard
+
+query GetAccidentCountByStatus($status: AccidentStatusType!) {
+  getAccidentCountByStatus(status: $status) {
+    count
+  }
+}
+
+query GetTotalTenantCount {
+  getTotalTenantCount {
+    count
+  }
+}
+
+query GetTotalFisherUserCount {
+  getTotalFisherUserCount {
+    count
+  }
+}
+
+query GetTotalDeviceCount {
+  getTotalDeviceCount {
+    count
+  }
+}
+
+query GetTenantFisherUserCount($tenantId: ID!) {
+  getTenantFisherUserCount(tenantId: $tenantId) {
+    count
+  }
+}
+
+query GetTenantAccidentCount($tenantId: ID!, $status: AccidentStatusType) {
+  getTenantAccidentCount(tenantId: $tenantId, status: $status) {
+    count
+  }
+}

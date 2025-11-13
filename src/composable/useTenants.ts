@@ -230,7 +230,7 @@ export default function useTenants() {
 
     if (result?.updateTenantLink) {
       return {
-        realtime: result.updateTenantLink.realtime,
+        realtime: result.updateTenantLink.realtime ?? false,
       };
     }
 

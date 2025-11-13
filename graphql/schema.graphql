@@ -71,9 +71,33 @@ type Query @aws_iam @aws_cognito_user_pools {
   getTenants(limit: Int, nextToken: String, nameCont: String): TenantPage
 
   # LinkedTenant queries
-  # Get linked tenants for a specific tenant.
+  # Get links for a specific tenant.
   # tenantId ID of the tenant to get links for
   getLinkedTenants(tenantId: ID!): [LinkedTenant!]!
+
+  # Statistics queries for Admin Tool Dashboard
+
+  # Get count of accidents by status
+  # status Status type to count (OPEN, CLOSED_RESCUED, CLOSED_FALSE_ALARM)
+  getAccidentCountByStatus(status: AccidentStatusType!): CountResult!
+
+  # Get total count of tenants
+  getTotalTenantCount: CountResult!
+
+  # Get total count of fisher users
+  getTotalFisherUserCount: CountResult!
+
+  # Get total count of devices
+  getTotalDeviceCount: CountResult!
+
+  # Get count of fisher users for a specific tenant
+  # tenantId ID of the tenant
+  getTenantFisherUserCount(tenantId: ID!): CountResult!
+
+  # Get count of accidents for a specific tenant by status
+  # tenantId ID of the tenant
+  # status Status type to count
+  getTenantAccidentCount(tenantId: ID!, status: AccidentStatusType): CountResult!
 }
 
 type Mutation @aws_iam @aws_cognito_user_pools {
@@ -143,12 +167,12 @@ type Mutation @aws_iam @aws_cognito_user_pools {
   # type 信号の種類
   # charging 充電中かどうか（true 充電中, false 充電中でない）
   # firmwareVersion ファームウェアのバージョン
-  sendMT825Event(
+  sendDeviceEvent(
     imei: String!
     sos: Boolean
     batteryPercentage: Int
     location: GeoLocationInput
-    type: MT825EventType
+    type: DeviceEventType
     charging: Boolean
     firmwareVersion: String
   ): Device
@@ -204,7 +228,7 @@ type Mutation @aws_iam @aws_cognito_user_pools {
   # tenantId ID of the source tenant
   # linkedTenantId ID of the target tenant
   # createdBy ID of the user creating the link
-  # realTime Whether the link should be real-time (default: false)
+  # realTime Boolean flag for real-time functionality (default: false)
   createTenantLink(tenantId: ID!, linkedTenantId: ID!, createdBy: ID!, realtime: Boolean): LinkedTenant
 
   # Update a link between tenants (toggle realTime field).
@@ -216,6 +240,15 @@ type Mutation @aws_iam @aws_cognito_user_pools {
   # tenantId ID of the source tenant
   # linkedTenantId ID of the target tenant
   deleteTenantLink(tenantId: ID!, linkedTenantId: ID!): Boolean
+
+  # Request rescue from linked tenants.
+  # accidentId ID of the accident to request rescue for
+  requestLinkedTenantRescue(accidentId: ID!, fisherUserId: ID!): Accident
+
+  # Update the list of tenants that have received rescue request notifications for an accident.
+  # accidentId ID of the accident to update
+  # tenantIds List of tenant IDs to add to the sent rescue request list
+  updateAccidentSentRescueRequestTenantIds(accidentId: ID!, tenantIds: [ID!]!): Accident
 
   # AppDevice関連のミューテーション
 
@@ -312,27 +345,6 @@ type Mutation @aws_iam @aws_cognito_user_pools {
   # fisherUserId LINE連携を解除するFisherUserのID
   # lineUserId LINE連携を解除するLINEユーザーのID
   stopLineUserSubscriptionToFisherUser(fisherUserId: ID!, lineUserId: ID!): FisherUser
-
-  # 削除関連のミューテーション
-
-  # FisherUserを削除する。
-  # Admin ToolでFisherUserを削除するために使用する。
-  # 注意: 削除前に以下の関連データの処理が自動実行される
-  # - 所有デバイスの所有者解除
-  # - テナントからの除名
-  # - LINE連携の解除
-  # - Cognitoユーザーの削除
-  # id 削除するFisherUserのID
-  deleteFisherUser(id: ID!): FisherUser
-
-  # Tenantを削除する。
-  # Admin ToolでTenantを削除するために使用する。
-  # 注意: 削除前に以下の安全性チェックが実行される
-  # - 所属メンバーが存在しないこと
-  # - 進行中の事故が存在しないこと
-  # - エスカレーション設定の削除
-  # id 削除するTenantのID
-  deleteTenant(id: ID!): Tenant
 }
 
 type Subscription @aws_iam @aws_cognito_user_pools {
@@ -345,7 +357,7 @@ type Subscription @aws_iam @aws_cognito_user_pools {
   # Deviceからの信号データが送信されたときに通知されるSubscription
   # 注意 現在は使用されていない。将来的に実装予定。
   # id 通知を受け取るDeviceのID
-  updatedDevice(id: ID!): Device @aws_subscribe(mutations: ["sendMT825Event"])
+  updatedDevice(id: ID!): Device @aws_subscribe(mutations: ["sendDeviceEvent"])
 
   # あるAccidentにおいて救助中のFisherUserがモバイルアプリの位置情報を送信したときに通知されるSubscription
   # 注意 現在は使用されていない。将来的に事故画面において、救助中のFisherUserの移動の軌跡を効率よく描画するために使用する予定。
@@ -376,6 +388,23 @@ type Accident @aws_iam @aws_cognito_user_pools {
   # この事故に関連しているTenant
   # ここに含まれるTenantのメンバーは、モバイルアプリを開くと事故画面に表示される
   tenants: [Tenant!]!
+
+  # Whether rescue has been requested from linked tenants
+  linkedRescueRequested: Boolean!
+
+  # Timestamp when rescue was requested from linked tenants
+  linkedRescueRequestedAt: AWSTimestamp
+
+  # ID of the user who requested rescue from linked tenants
+  linkedRescueRequestedBy: ID
+
+  # IDs of users who requested rescue from linked tenants
+  linkedRescueRequestedByUsers: [ID]
+
+  # IDs of tenants that have been sent rescue requests
+  sentRescueRequestTenantIds: [ID]
+
+  requestedTenantIds: [ID]
 
   # このAccidentに救助者として登録されているFisherUser
   # モバイルアプリ上で「救助に向かう」ボタンを押すとここに追加される
@@ -475,6 +504,8 @@ type Tenant @aws_iam @aws_cognito_user_pools {
   # 閉じられたものも含めた、このTenantに紐づく全てのAccident
   # 注意 結果は順不同。将来的にDynamoDBのIndexを更新してソートして返却する予定。
   accidents: [Accident!]
+
+  linkedTenants: [LinkedTenant!]
 }
 
 type TenantPage @aws_iam @aws_cognito_user_pools {
@@ -487,7 +518,7 @@ type LinkedTenant @aws_iam @aws_cognito_user_pools {
   id: ID!
   tenantId: ID!
   linkedTenantId: ID!
-  realtime: Boolean!
+  realtime: Boolean
   createdAt: AWSTimestamp!
   createdBy: String!
   tenant: Tenant
@@ -508,12 +539,6 @@ type Device @aws_iam @aws_cognito_user_pools {
   # startTimestamp 取得する最古のエポックミリ秒（デフォルト 0）
   # endTimestamp 取得する最新のエポックミリ秒（デフォルト ∞）
   deviceSignals(startTimestamp: AWSTimestamp, endTimestamp: AWSTimestamp): [DeviceSignal!]!
-
-  # Deviceから送信された全信号データ（sos含む）
-  # timestampの昇順で返却される
-  # startTimestamp 取得する最古のエポックミリ秒（デフォルト 0）
-  # endTimestamp 取得する最新のエポックミリ秒（デフォルト ∞）
-  deviceAllSignals(startTimestamp: AWSTimestamp, endTimestamp: AWSTimestamp): [DeviceAllSignal!]!
 }
 
 enum DeviceType {
@@ -539,17 +564,8 @@ type DeviceSignal @aws_iam @aws_cognito_user_pools {
   timestamp: AWSTimestamp!
 }
 
-# DeviceAllSignal: DeviceSignalにsosを加えた型
-type DeviceAllSignal @aws_iam @aws_cognito_user_pools {
-  batteryPercentage: Int
-  latitude: Float!
-  longitude: Float!
-  timestamp: AWSTimestamp!
-  sos: Boolean!
-}
-
-# MT825端末の信号イベントの種類
-enum MT825EventType {
+# TODO: MT825依存のイベントリストとなっており、バックエンドでもほぼ利用していないため整理する (なんならバックエンドでの利用箇所を全て剥がせたら消しちゃいたい)
+enum DeviceEventType {
   EVENT_POWER_ON
   EVENT_GPS_REPORT
   EVENT_WIFI_REPORT
@@ -673,6 +689,11 @@ input LineMessageInput {
 type SendNotificationToSpecificLocationResponse {
   # 通知を受け取った人数
   recipient: Int!
+}
+
+# Statistics types for Admin Tool
+type CountResult @aws_iam @aws_cognito_user_pools {
+  count: Int!
 }
 
 scalar AWSTimestamp

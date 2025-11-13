@@ -10,9 +10,11 @@ import {
 } from "@/components/base";
 import BusinessIcon from "@/components/icons/BusinessIcon.vue";
 import LinkedTenantsList from "@/components/tenants/LinkedTenantsList.vue";
+import TenantStatisticsCards from "@/components/TenantStatisticsCards.vue";
 import useSwal from "@/composable/useSwal";
 import useTenants from "@/composable/useTenants";
 import useCurrentUser from "@/composable/useCurrentUser";
+import useStatistics from "@/composable/useStatistics";
 import type { Tenant, LinkedTenant } from "@/types/tenant";
 
 const route = useRoute();
@@ -28,6 +30,7 @@ const {
   getTenants,
 } = useTenants();
 const { getUserId } = useCurrentUser();
+const { getTenantStats } = useStatistics();
 
 const tenant = ref<Tenant | null>(null);
 const linkedTenants = ref<LinkedTenant[]>([]);
@@ -35,6 +38,15 @@ const allTenants = ref<Tenant[]>([]);
 const isLoading = ref(true);
 const isSaving = ref(false);
 const isLoadingTenants = ref(false);
+
+// Tenant statistics
+const tenantStats = ref({
+  fisherUserCount: null as number | null,
+  openAccidentCount: null as number | null,
+  totalAccidentCount: null as number | null,
+  linkedTenantsCount: null as number | null,
+});
+const isLoadingStats = ref(false);
 
 // Form data
 const tenantForm = ref({
@@ -216,9 +228,30 @@ const handleLoadTenants = async () => {
   isLoadingTenants.value = false;
 };
 
+// Fetch tenant statistics
+const fetchTenantStats = async () => {
+  if (!tenant.value) return;
+
+  isLoadingStats.value = true;
+  try {
+    const stats = await getTenantStats(tenant.value.id);
+    if (stats) {
+      tenantStats.value = {
+        ...stats,
+        linkedTenantsCount: linkedTenants.value.length,
+      };
+    }
+  } catch (err) {
+    console.error("Failed to load tenant statistics:", err);
+  } finally {
+    isLoadingStats.value = false;
+  }
+};
+
 onMounted(async () => {
   await fetchTenant();
   await fetchLinkedTenants();
+  await fetchTenantStats();
 });
 </script>
 
@@ -243,7 +276,7 @@ onMounted(async () => {
       </PageHeader>
 
       <!-- Action Buttons -->
-      <div class="mb-6 flex justify-end gap-3">
+      <div class="mb-8 flex justify-end gap-3">
         <BaseButton
           variant="primary"
           @click="router.push(`/tenants/${tenant.id}/accounts`)"
@@ -252,65 +285,88 @@ onMounted(async () => {
         </BaseButton>
       </div>
 
-      <!-- Tenant Details Card -->
-      <div class="w-full bg-white rounded-lg shadow-md p-4 sm:p-6 mb-6">
-        <h3
-          class="text-start text-base sm:text-lg font-semibold text-gray-900 mb-4"
-        >
-          基本情報
-        </h3>
+      <!-- Tenant Statistics Section -->
+      <div class="mb-10">
+        <div class="mb-6">
+          <h3 class="text-xl sm:text-2xl font-bold text-gray-800 mb-2">
+            📊 テナント統計
+          </h3>
+          <p class="text-sm text-gray-600">
+            このテナントに関連するユーザーと事故の統計情報
+          </p>
+        </div>
+        <TenantStatisticsCards :stats="tenantStats" :loading="isLoadingStats" />
+      </div>
 
-        <div class="space-y-4">
+      <!-- Tenant Details Card -->
+      <div
+        class="w-full bg-gradient-to-br from-white to-gray-50 rounded-xl shadow-lg border-2 border-gray-100 p-6 sm:p-8 mb-8 hover:shadow-xl transition-shadow duration-300"
+      >
+        <div
+          class="flex items-center gap-3 mb-6 border-b-2 border-gray-200 pb-4"
+        >
+          <div
+            class="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary"
+          >
+            <BusinessIcon class="text-2xl" />
+          </div>
+          <h3 class="text-start text-xl sm:text-2xl font-bold text-gray-900">
+            基本情報
+          </h3>
+        </div>
+
+        <div class="space-y-6">
           <!-- Tenant ID (Read-only) -->
-          <div>
+          <div class="group">
             <label
-              class="text-start block text-sm font-medium text-gray-700 mb-1"
+              class="text-start block text-sm font-semibold text-gray-700 mb-2"
             >
               テナントID
             </label>
             <div
-              class="text-start w-full px-3 py-2 text-sm text-gray-900 font-mono bg-gray-50 border border-gray-300 rounded-md break-all"
+              class="text-start w-full px-4 py-3 text-sm text-gray-900 font-mono bg-gradient-to-r from-gray-50 to-gray-100 border-2 border-gray-200 rounded-lg break-all transition-all group-hover:border-primary/30"
             >
               {{ tenant.id }}
             </div>
           </div>
 
           <!-- Tenant Name (Editable) -->
-          <div>
+          <div class="group">
             <label
-              class="text-start block text-sm font-medium text-gray-700 mb-1"
+              class="text-start block text-sm font-semibold text-gray-700 mb-2"
             >
               テナント名 <span class="text-red-500">*</span>
             </label>
             <input
               v-model="tenantForm.name"
               type="text"
-              class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+              class="w-full px-4 py-3 text-sm border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all hover:border-gray-300"
               placeholder="テナント名を入力してください"
             />
           </div>
 
           <!-- Tenant Address (Editable) -->
-          <div>
+          <div class="group">
             <label
-              class="text-start block text-sm font-medium text-gray-700 mb-1"
+              class="text-start block text-sm font-semibold text-gray-700 mb-2"
             >
               住所 <span class="text-red-500">*</span>
             </label>
             <input
               v-model="tenantForm.address"
               type="text"
-              class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+              class="w-full px-4 py-3 text-sm border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all hover:border-gray-300"
               placeholder="住所を入力してください"
             />
           </div>
 
           <!-- Update Button -->
-          <div class="flex justify-end pt-2">
+          <div class="flex justify-end pt-4">
             <BaseButton
               variant="primary"
               @click="handleUpdateTenant"
               :disabled="isSaving || !tenantForm.name || !tenantForm.address"
+              class="px-8 py-3 text-base font-semibold"
             >
               <span v-if="isSaving">更新中...</span>
               <span v-else>更新</span>
