@@ -27,6 +27,16 @@ const routes: RouteRecordRaw[] = [
     name: "TenantAccounts",
     component: () => import("@/views/accounts/index.vue"),
   },
+  {
+    path: "/tenants/:tenantId/accounts/:id",
+    name: "AccountDetail",
+    component: () => import("@/views/accounts/_id/index.vue"),
+  },
+  {
+    path: "/tenants/:tenantId/accounts/:id/edit",
+    name: "AccountEdit",
+    component: () => import("@/views/accounts/_id/edit.vue"),
+  },
 ];
 
 const router = createRouter({

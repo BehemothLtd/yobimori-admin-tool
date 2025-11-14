@@ -39,14 +39,14 @@ const isLoading = ref(true);
 const isSaving = ref(false);
 const isLoadingTenants = ref(false);
 
-// Tenant statistics
+// Tenant statistics - Initialize with 0 to prevent NaN/null display
 const tenantStats = ref({
-  fisherUserCount: null as number | null,
-  openAccidentCount: null as number | null,
-  totalAccidentCount: null as number | null,
-  linkedTenantsCount: null as number | null,
+  fisherUserCount: 0,
+  openAccidentCount: 0,
+  totalAccidentCount: 0,
+  linkedTenantsCount: 0,
 });
-const isLoadingStats = ref(false);
+const isLoadingStats = ref(true); // Start as loading
 
 // Form data
 const tenantForm = ref({
@@ -85,7 +85,9 @@ const fetchTenant = async () => {
 // Fetch linked tenants
 const fetchLinkedTenants = async () => {
   const tenantId = route.params.id as string;
-  linkedTenants.value = await getLinkedTenants(tenantId);
+  const result = await getLinkedTenants(tenantId);
+  // Ensure linkedTenants is always an array (prevents NaN from .length on undefined)
+  linkedTenants.value = result || [];
 };
 
 const handleUpdateTenant = async () => {
@@ -237,12 +239,30 @@ const fetchTenantStats = async () => {
     const stats = await getTenantStats(tenant.value.id);
     if (stats) {
       tenantStats.value = {
-        ...stats,
-        linkedTenantsCount: linkedTenants.value.length,
+        fisherUserCount: stats.fisherUserCount ?? 0,
+        openAccidentCount: stats.openAccidentCount ?? 0,
+        totalAccidentCount: stats.totalAccidentCount ?? 0,
+        // Ensure linkedTenants is an array before accessing .length
+        linkedTenantsCount: (linkedTenants.value || []).length,
+      };
+    } else {
+      // Fallback if stats is null
+      tenantStats.value = {
+        fisherUserCount: 0,
+        openAccidentCount: 0,
+        totalAccidentCount: 0,
+        linkedTenantsCount: (linkedTenants.value || []).length,
       };
     }
   } catch (err) {
     console.error("Failed to load tenant statistics:", err);
+    // Set to 0 on error
+    tenantStats.value = {
+      fisherUserCount: 0,
+      openAccidentCount: 0,
+      totalAccidentCount: 0,
+      linkedTenantsCount: (linkedTenants.value || []).length,
+    };
   } finally {
     isLoadingStats.value = false;
   }

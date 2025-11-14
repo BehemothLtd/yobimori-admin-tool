@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useRouter, useRoute } from "vue-router";
-import { signOut } from "aws-amplify/auth";
+// Authentication disabled - using mock data
+// import { signOut } from "aws-amplify/auth";
 import {
   HomeOutlined,
   ShopOutlined,
@@ -55,10 +56,10 @@ const handleNavigation = (href: string) => {
 
 const handleLogout = async () => {
   try {
-    await signOut();
+    // Mock logout - no actual signOut needed
     emit("close");
     await success({ title: "ログアウトしました" });
-    // Redirect to home or login page
+    // Redirect to home page
     router.push("/");
     // Reload to clear any cached data
     window.location.reload();

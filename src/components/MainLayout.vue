@@ -2,7 +2,8 @@
 import { ref, onMounted, onUnmounted } from "vue";
 import { useRouter } from "vue-router";
 import { LogoutOutlined } from "@ant-design/icons-vue";
-import { signOut } from "aws-amplify/auth";
+// Authentication disabled - using mock data
+// import { signOut } from "aws-amplify/auth";
 import DrawerMenu from "./DrawerMenu.vue";
 import useSwal from "@/composable/useSwal";
 
@@ -34,9 +35,9 @@ const closeDrawer = () => {
 
 const handleLogout = async () => {
   try {
-    await signOut();
+    // Mock logout - no actual signOut needed
     await success({ title: "ログアウトしました" });
-    // Redirect to home or login page
+    // Redirect to home page
     router.push("/");
     // Reload to clear any cached data
     window.location.reload();

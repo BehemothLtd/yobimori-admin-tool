@@ -1,14 +1,9 @@
 <script setup lang="ts">
-import { Authenticator } from "@aws-amplify/ui-vue";
-import "@aws-amplify/ui-vue/styles.css";
+// Authentication disabled - using mock data
 </script>
 
 <template>
-  <Authenticator :hide-sign-up="true">
-    <template v-slot="{ signOut }">
-      <router-view :sign-out="signOut" />
-    </template>
-  </Authenticator>
+  <router-view />
 </template>
 
 <style>
