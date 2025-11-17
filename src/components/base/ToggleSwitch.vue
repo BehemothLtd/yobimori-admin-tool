@@ -1,7 +1,4 @@
 <script setup lang="ts">
-import { Switch } from '@headlessui/vue';
-import { computed } from 'vue';
-
 interface Props {
   modelValue: boolean;
   label?: string;
@@ -15,35 +12,85 @@ interface Emits {
 const props = defineProps<Props>();
 const emit = defineEmits<Emits>();
 
-const enabled = computed({
-  get: () => props.modelValue,
-  set: (value: boolean) => {
-    if (!props.disabled) {
-      emit("update:modelValue", value);
-    }
+const handleChange = (event: Event) => {
+  if (!props.disabled) {
+    const target = event.target as HTMLInputElement;
+    emit("update:modelValue", target.checked);
   }
-});
+};
 </script>
 
 <template>
   <div class="flex items-center gap-x-3">
-    <Switch
-      v-model="enabled"
-      :disabled="disabled"
-      :class="[
-        enabled ? 'bg-gradient-to-r from-[#ef654d] to-[#ff8a65]' : 'bg-gray-200',
-        'relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2'
-      ]"
-    >
-      <span
-        :class="[
-          enabled ? 'translate-x-6' : 'translate-x-1',
-          'inline-block h-4 w-4 transform rounded-full bg-white shadow-lg transition'
-        ]"
+    <label class="toggle-switch">
+      <input
+        type="checkbox"
+        :checked="modelValue"
+        :disabled="disabled"
+        @change="handleChange"
+        class="toggle-input"
       />
-    </Switch>
+      <span class="toggle-slider"></span>
+    </label>
     <span v-if="label" class="text-sm font-medium text-gray-900">
       {{ label }}
     </span>
   </div>
 </template>
+
+<style scoped>
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+}
+
+.toggle-input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #e5e7eb;
+  transition: 0.3s;
+  border-radius: 24px;
+}
+
+.toggle-slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.3s;
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.toggle-input:checked + .toggle-slider {
+  background: linear-gradient(to right, #ef654d, #ff8a65);
+}
+
+.toggle-input:focus + .toggle-slider {
+  box-shadow: 0 0 0 2px white, 0 0 0 4px #ef654d;
+}
+
+.toggle-input:checked + .toggle-slider:before {
+  transform: translateX(20px);
+}
+
+.toggle-input:disabled + .toggle-slider {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+</style>
