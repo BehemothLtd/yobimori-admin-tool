@@ -1,0 +1,352 @@
+[
+  {
+    "id": "tenant-001-abc123def",
+    "name": "佐藤海運株式会社",
+    "address": "〒105-0001 東京都港区虎ノ門1-1-1",
+    "createdAt": 1704067200000,
+    "updatedAt": 1735689600000
+  },
+  {
+    "id": "tenant-002-def456ghi",
+    "name": "田中水産",
+    "address": "〒060-0001 北海道札幌市中央区北1条西2-1",
+    "createdAt": 1704153600000,
+    "updatedAt": 1735776000000
+  },
+  {
+    "id": "tenant-003-ghi789jkl",
+    "name": "鈴木マリンサービス",
+    "address": "〒980-0021 宮城県仙台市青葉区中央3-3-3",
+    "createdAt": 1704240000000,
+    "updatedAt": 1735862400000
+  },
+  {
+    "id": "tenant-004-jkl012mno",
+    "name": "高橋フィッシング",
+    "address": "〒950-0088 新潟県新潟市中央区万代1-2-12",
+    "createdAt": 1704326400000,
+    "updatedAt": 1735948800000
+  },
+  {
+    "id": "tenant-005-mno345pqr",
+    "name": "伊藤漁業協同組合",
+    "address": "〒230-0051 神奈川県横浜市鶴見区鶴見中央4-1-8",
+    "createdAt": 1704412800000,
+    "updatedAt": 1736035200000
+  },
+  {
+    "id": "tenant-006-pqr678stu",
+    "name": "渡辺シーフード",
+    "address": "〒420-0852 静岡県静岡市葵区紺屋町5-5-5",
+    "createdAt": 1704499200000,
+    "updatedAt": 1736121600000
+  },
+  {
+    "id": "tenant-007-stu901vwx",
+    "name": "山本海洋開発",
+    "address": "〒460-0008 愛知県名古屋市中区栄3-18-1",
+    "createdAt": 1704585600000,
+    "updatedAt": 1736208000000
+  },
+  {
+    "id": "tenant-008-vwx234yza",
+    "name": "中村マリンテック",
+    "address": "〒530-0001 大阪府大阪市北区梅田1-3-1",
+    "createdAt": 1704672000000,
+    "updatedAt": 1736294400000
+  },
+  {
+    "id": "tenant-009-yza567bcd",
+    "name": "小林水産加工",
+    "address": "〒650-0001 兵庫県神戸市中央区加納町2-1-1",
+    "createdAt": 1704758400000,
+    "updatedAt": 1736380800000
+  },
+  {
+    "id": "tenant-010-bcd890efg",
+    "name": "加藤フィッシャリー",
+    "address": "〒730-0011 広島県広島市中区基町6-27",
+    "createdAt": 1704844800000,
+    "updatedAt": 1736467200000
+  },
+  {
+    "id": "tenant-011-efg123hij",
+    "name": "吉田海産物",
+    "address": "〒760-0020 香川県高松市錦町1-7-3",
+    "createdAt": 1704931200000,
+    "updatedAt": 1736553600000
+  },
+  {
+    "id": "tenant-012-hij456klm",
+    "name": "山田水産株式会社",
+    "address": "〒810-0001 福岡県福岡市中央区天神2-3-10",
+    "createdAt": 1705017600000,
+    "updatedAt": 1736640000000
+  },
+  {
+    "id": "tenant-013-klm789nop",
+    "name": "佐々木マリン工業",
+    "address": "〒890-0053 鹿児島県鹿児島市中央町4-1",
+    "createdAt": 1705104000000,
+    "updatedAt": 1736726400000
+  },
+  {
+    "id": "tenant-014-nop012qrs",
+    "name": "松本漁業",
+    "address": "〒900-0015 沖縄県那覇市久茂地1-1-1",
+    "createdAt": 1705190400000,
+    "updatedAt": 1736812800000
+  },
+  {
+    "id": "tenant-015-qrs345tuv",
+    "name": "井上シーフーズ",
+    "address": "〒780-0870 高知県高知市本町1-1-1",
+    "createdAt": 1705276800000,
+    "updatedAt": 1736899200000
+  },
+  {
+    "id": "tenant-016-tuv678wxy",
+    "name": "木村海運",
+    "address": "〒790-0001 愛媛県松山市一番町3-2-1",
+    "createdAt": 1705363200000,
+    "updatedAt": 1736985600000
+  },
+  {
+    "id": "tenant-017-wxy901zab",
+    "name": "林水産加工場",
+    "address": "〒770-0831 徳島県徳島市寺島本町西1-5",
+    "createdAt": 1705449600000,
+    "updatedAt": 1737072000000
+  },
+  {
+    "id": "tenant-018-zab234cde",
+    "name": "斎藤マリンサプライ",
+    "address": "〒640-8137 和歌山県和歌山市吹上1-2-18",
+    "createdAt": 1705536000000,
+    "updatedAt": 1737158400000
+  },
+  {
+    "id": "tenant-019-cde567fgh",
+    "name": "清水漁業協会",
+    "address": "〒520-0043 滋賀県大津市中央1-1-1",
+    "createdAt": 1705622400000,
+    "updatedAt": 1737244800000
+  },
+  {
+    "id": "tenant-020-fgh890ijk",
+    "name": "森海洋サービス",
+    "address": "〒600-8009 京都府京都市下京区四条通烏丸東入長刀鉾町8",
+    "createdAt": 1705708800000,
+    "updatedAt": 1737331200000
+  },
+  {
+    "id": "tenant-021-ijk123lmn",
+    "name": "池田フィッシング",
+    "address": "〒520-0801 滋賀県大津市におの浜1-1-20",
+    "createdAt": 1705795200000,
+    "updatedAt": 1737417600000
+  },
+  {
+    "id": "tenant-022-lmn456opq",
+    "name": "橋本水産",
+    "address": "〒514-0009 三重県津市羽所町345",
+    "createdAt": 1705881600000,
+    "updatedAt": 1737504000000
+  },
+  {
+    "id": "tenant-023-opq789rst",
+    "name": "山口マリンテクノロジー",
+    "address": "〒500-8833 岐阜県岐阜市神田町8-5",
+    "createdAt": 1705968000000,
+    "updatedAt": 1737590400000
+  },
+  {
+    "id": "tenant-024-rst012uvw",
+    "name": "阿部海運株式会社",
+    "address": "〒920-0853 石川県金沢市本町2-15-1",
+    "createdAt": 1706054400000,
+    "updatedAt": 1737676800000
+  },
+  {
+    "id": "tenant-025-uvw345xyz",
+    "name": "後藤水産",
+    "address": "〒910-0006 福井県福井市中央1-2-1",
+    "createdAt": 1706140800000,
+    "updatedAt": 1737763200000
+  },
+  {
+    "id": "tenant-026-xyz678abc",
+    "name": "藤田フィッシャリー",
+    "address": "〒400-0031 山梨県甲府市丸の内1-1-20",
+    "createdAt": 1706227200000,
+    "updatedAt": 1737849600000
+  },
+  {
+    "id": "tenant-027-abc901def",
+    "name": "西村海洋開発",
+    "address": "〒380-0824 長野県長野市南石堂町1423",
+    "createdAt": 1706313600000,
+    "updatedAt": 1737936000000
+  },
+  {
+    "id": "tenant-028-def234ghi",
+    "name": "福田マリン",
+    "address": "〒930-0083 富山県富山市総曲輪3-8-34",
+    "createdAt": 1706400000000,
+    "updatedAt": 1738022400000
+  },
+  {
+    "id": "tenant-029-ghi567jkl",
+    "name": "太田漁業",
+    "address": "〒010-0001 秋田県秋田市中通2-3-8",
+    "createdAt": 1706486400000,
+    "updatedAt": 1738108800000
+  },
+  {
+    "id": "tenant-030-jkl890mno",
+    "name": "岡田水産加工",
+    "address": "〒020-0022 岩手県盛岡市大通1-2-1",
+    "createdAt": 1706572800000,
+    "updatedAt": 1738195200000
+  },
+  {
+    "id": "tenant-031-mno123pqr",
+    "name": "長谷川シーフード",
+    "address": "〒990-0039 山形県山形市香澄町2-2-31",
+    "createdAt": 1706659200000,
+    "updatedAt": 1738281600000
+  },
+  {
+    "id": "tenant-032-pqr456stu",
+    "name": "近藤マリンサービス",
+    "address": "〒960-8043 福島県福島市中町1-1",
+    "createdAt": 1706745600000,
+    "updatedAt": 1738368000000
+  },
+  {
+    "id": "tenant-033-stu789vwx",
+    "name": "石川海運",
+    "address": "〒310-0015 茨城県水戸市宮町1-7-31",
+    "createdAt": 1706832000000,
+    "updatedAt": 1738454400000
+  },
+  {
+    "id": "tenant-034-vwx012yza",
+    "name": "前田水産",
+    "address": "〒320-0811 栃木県宇都宮市大通り2-1-5",
+    "createdAt": 1706918400000,
+    "updatedAt": 1738540800000
+  },
+  {
+    "id": "tenant-035-yza345bcd",
+    "name": "増田フィッシング",
+    "address": "〒371-0023 群馬県前橋市本町2-12-1",
+    "createdAt": 1707004800000,
+    "updatedAt": 1738627200000
+  },
+  {
+    "id": "tenant-036-bcd678efg",
+    "name": "小川マリンテック",
+    "address": "〒330-0063 埼玉県さいたま市浦和区高砂3-15-1",
+    "createdAt": 1707091200000,
+    "updatedAt": 1738713600000
+  },
+  {
+    "id": "tenant-037-efg901hij",
+    "name": "平野海洋",
+    "address": "〒260-0013 千葉県千葉市中央区中央3-10-1",
+    "createdAt": 1707177600000,
+    "updatedAt": 1738800000000
+  },
+  {
+    "id": "tenant-038-hij234klm",
+    "name": "坂本水産株式会社",
+    "address": "〒160-0023 東京都新宿区西新宿1-1-1",
+    "createdAt": 1707264000000,
+    "updatedAt": 1738886400000
+  },
+  {
+    "id": "tenant-039-klm567nop",
+    "name": "村上漁業協同組合",
+    "address": "〒231-0005 神奈川県横浜市中区本町6-50-1",
+    "createdAt": 1707350400000,
+    "updatedAt": 1738972800000
+  },
+  {
+    "id": "tenant-040-nop890qrs",
+    "name": "原田シーフーズ",
+    "address": "〒951-8066 新潟県新潟市中央区東堀前通6-1055",
+    "createdAt": 1707436800000,
+    "updatedAt": 1739059200000
+  },
+  {
+    "id": "tenant-041-qrs123tuv",
+    "name": "宮崎マリン工業",
+    "address": "〒422-8067 静岡県静岡市駿河区南町14-1",
+    "createdAt": 1707523200000,
+    "updatedAt": 1739145600000
+  },
+  {
+    "id": "tenant-042-tuv456wxy",
+    "name": "三浦海運",
+    "address": "〒450-0002 愛知県名古屋市中村区名駅4-7-1",
+    "createdAt": 1707609600000,
+    "updatedAt": 1739232000000
+  },
+  {
+    "id": "tenant-043-wxy789zab",
+    "name": "内田水産",
+    "address": "〒520-0047 滋賀県大津市浜大津1-1-1",
+    "createdAt": 1707696000000,
+    "updatedAt": 1739318400000
+  },
+  {
+    "id": "tenant-044-zab012cde",
+    "name": "河野フィッシャリー",
+    "address": "〒604-8005 京都府京都市中京区河原町通三条下る",
+    "createdAt": 1707782400000,
+    "updatedAt": 1739404800000
+  },
+  {
+    "id": "tenant-045-cde345fgh",
+    "name": "菅原海洋サービス",
+    "address": "〒542-0081 大阪府大阪市中央区南船場3-5-11",
+    "createdAt": 1707868800000,
+    "updatedAt": 1739491200000
+  },
+  {
+    "id": "tenant-046-fgh678ijk",
+    "name": "久保マリンサプライ",
+    "address": "〒651-0087 兵庫県神戸市中央区御幸通8-1-6",
+    "createdAt": 1707955200000,
+    "updatedAt": 1739577600000
+  },
+  {
+    "id": "tenant-047-ijk901lmn",
+    "name": "横山水産加工",
+    "address": "〒640-8044 和歌山県和歌山市板屋町23",
+    "createdAt": 1708041600000,
+    "updatedAt": 1739664000000
+  },
+  {
+    "id": "tenant-048-lmn234opq",
+    "name": "古川漁業",
+    "address": "〒700-0901 岡山県岡山市北区本町6-36",
+    "createdAt": 1708128000000,
+    "updatedAt": 1739750400000
+  },
+  {
+    "id": "tenant-049-opq567rst",
+    "name": "北村シーフード",
+    "address": "〒730-0051 広島県広島市中区大手町1-5-3",
+    "createdAt": 1708214400000,
+    "updatedAt": 1739836800000
+  },
+  {
+    "id": "tenant-050-rst890uvw",
+    "name": "杉山マリンテクノロジー",
+    "address": "〒750-0006 山口県下関市南部町2-7",
+    "createdAt": 1708300800000,
+    "updatedAt": 1739923200000
+  }
+]
