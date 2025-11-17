@@ -22,12 +22,13 @@ interface TenantRelationships {
   };
 }
 
-const svgWidth = 1600;
-const svgHeight = 1200;
+const svgWidth = ref(1600);
+const svgHeight = ref(1200);
 const nodeRadius = 20;
 
 const tenants = ref<Tenant[]>([]);
 const connections = ref<Connection[]>([]);
+const containerRef = ref<HTMLElement | null>(null);
 
 // Pan and Zoom state
 const zoom = ref(1);
@@ -37,10 +38,9 @@ const isPanning = ref(false);
 const panStartX = ref(0);
 const panStartY = ref(0);
 
-// Drag state
-const draggedNode = ref<Tenant | null>(null);
-const dragOffsetX = ref(0);
-const dragOffsetY = ref(0);
+// Touch state
+const touchStartDistance = ref(0);
+const touchStartZoom = ref(1);
 
 // Selection state
 const selectedNode = ref<Tenant | null>(null);
@@ -91,8 +91,8 @@ const loadTenantData = () => {
 
 // Calculate node positions using force-directed layout
 const calculateNodePositions = () => {
-  const centerX = svgWidth / 2;
-  const centerY = svgHeight / 2;
+  const centerX = svgWidth.value / 2;
+  const centerY = svgHeight.value / 2;
 
   // Initialize random positions
   tenants.value.forEach((tenant, i) => {
@@ -208,8 +208,8 @@ const calculateNodePositions = () => {
       tenant.y += velocity.vy;
 
       // Keep nodes within bounds with padding
-      tenant.x = Math.max(100, Math.min(svgWidth - 100, tenant.x));
-      tenant.y = Math.max(100, Math.min(svgHeight - 100, tenant.y));
+      tenant.x = Math.max(100, Math.min(svgWidth.value - 100, tenant.x));
+      tenant.y = Math.max(100, Math.min(svgHeight.value - 100, tenant.y));
 
       // Ensure no NaN values
       if (isNaN(tenant.x) || isNaN(tenant.y)) {
@@ -445,41 +445,73 @@ const handleMouseMove = (event: MouseEvent) => {
   if (isPanning.value) {
     panX.value = event.clientX - panStartX.value;
     panY.value = event.clientY - panStartY.value;
-  } else if (draggedNode.value && svgRef.value) {
-    const svgRect = svgRef.value.getBoundingClientRect();
-    const x = (event.clientX - svgRect.left - panX.value) / zoom.value;
-    const y = (event.clientY - svgRect.top - panY.value) / zoom.value;
-    draggedNode.value.x = x - dragOffsetX.value;
-    draggedNode.value.y = y - dragOffsetY.value;
   }
 };
 
 const handleMouseUp = () => {
   isPanning.value = false;
-  draggedNode.value = null;
-};
-
-// Node drag handlers
-const startNodeDrag = (event: MouseEvent, tenant: Tenant) => {
-  event.stopPropagation();
-  draggedNode.value = tenant;
-
-  if (svgRef.value) {
-    const svgRect = svgRef.value.getBoundingClientRect();
-    const x = (event.clientX - svgRect.left - panX.value) / zoom.value;
-    const y = (event.clientY - svgRect.top - panY.value) / zoom.value;
-    dragOffsetX.value = x - tenant.x;
-    dragOffsetY.value = y - tenant.y;
-  }
 };
 
 // Node click handler for selection
 const handleNodeClick = (event: MouseEvent, tenant: Tenant) => {
   event.stopPropagation();
-  // Only select if we didn't drag
-  if (!draggedNode.value) {
-    selectedNode.value = selectedNode.value?.id === tenant.id ? null : tenant;
+  selectedNode.value = selectedNode.value?.id === tenant.id ? null : tenant;
+};
+
+// Touch event handlers for mobile
+const getTouchDistance = (touch1: Touch, touch2: Touch): number => {
+  const dx = touch2.clientX - touch1.clientX;
+  const dy = touch2.clientY - touch1.clientY;
+  return Math.sqrt(dx * dx + dy * dy);
+};
+
+const handleTouchStart = (event: TouchEvent) => {
+  if (event.touches.length === 2) {
+    // Two-finger pinch to zoom
+    event.preventDefault();
+    const touch1 = event.touches[0];
+    const touch2 = event.touches[1];
+    if (touch1 && touch2) {
+      touchStartDistance.value = getTouchDistance(touch1, touch2);
+      touchStartZoom.value = zoom.value;
+    }
+  } else if (event.touches.length === 1) {
+    // Single finger pan
+    const touch = event.touches[0];
+    if (touch && (event.target === svgRef.value || (event.target as SVGElement).classList.contains('background'))) {
+      isPanning.value = true;
+      panStartX.value = touch.clientX - panX.value;
+      panStartY.value = touch.clientY - panY.value;
+      // Deselect node when touching background
+      selectedNode.value = null;
+    }
   }
+};
+
+const handleTouchMove = (event: TouchEvent) => {
+  if (event.touches.length === 2) {
+    // Two-finger pinch to zoom
+    event.preventDefault();
+    const touch1 = event.touches[0];
+    const touch2 = event.touches[1];
+    if (touch1 && touch2 && touchStartDistance.value > 0) {
+      const currentDistance = getTouchDistance(touch1, touch2);
+      const scale = currentDistance / touchStartDistance.value;
+      zoom.value = Math.max(0.1, Math.min(5, touchStartZoom.value * scale));
+    }
+  } else if (event.touches.length === 1 && isPanning.value) {
+    // Single finger pan
+    const touch = event.touches[0];
+    if (touch) {
+      panX.value = touch.clientX - panStartX.value;
+      panY.value = touch.clientY - panStartY.value;
+    }
+  }
+};
+
+const handleTouchEnd = () => {
+  isPanning.value = false;
+  touchStartDistance.value = 0;
 };
 
 // Get connections for selected node
@@ -521,32 +553,52 @@ const stats = computed(() => {
   };
 });
 
+// Update SVG dimensions based on container size
+const updateDimensions = () => {
+  if (containerRef.value) {
+    const containerWidth = containerRef.value.clientWidth - 48; // Subtract padding
+    const containerHeight = Math.max(600, Math.min(1200, window.innerHeight - 400));
+
+    // Maintain aspect ratio but adapt to screen size
+    svgWidth.value = Math.max(800, containerWidth);
+    svgHeight.value = Math.max(600, containerHeight);
+  }
+};
+
 onMounted(() => {
   loadTenantData();
+  updateDimensions();
   calculateNodePositions();
+
+  // Set initial zoom based on screen size
+  if (window.innerWidth < 640) {
+    // Mobile: zoom in by default
+    zoom.value = 1.5;
+  }
 
   // Add global mouse event listeners
   window.addEventListener('mousemove', handleMouseMove);
   window.addEventListener('mouseup', handleMouseUp);
+  window.addEventListener('resize', updateDimensions);
 });
 </script>
 
 <template>
-  <div class="tenant-relationship-graph">
-    <div class="flex justify-between items-center mb-4">
-      <h3 class="text-xl font-semibold text-gray-800">テナント関係ネットワーク</h3>
+  <div ref="containerRef" class="tenant-relationship-graph">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
+      <h3 class="text-lg sm:text-xl font-semibold text-gray-800">テナント関係ネットワーク</h3>
 
       <!-- Stats -->
-      <div class="flex gap-4 text-sm">
-        <div class="flex items-center gap-2">
+      <div class="flex gap-2 sm:gap-4 text-xs sm:text-sm flex-wrap">
+        <div class="flex items-center gap-1 sm:gap-2">
           <span class="font-medium text-gray-600">テナント数:</span>
           <span class="font-bold text-gray-900">{{ stats.totalTenants }}</span>
         </div>
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-1 sm:gap-2">
           <span class="font-medium text-gray-600">接続数:</span>
           <span class="font-bold text-gray-900">{{ stats.totalConnections }}</span>
         </div>
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-1 sm:gap-2">
           <span class="font-medium text-gray-600">ズーム:</span>
           <span class="font-bold text-gray-900">{{ (zoom * 100).toFixed(0) }}%</span>
         </div>
@@ -554,14 +606,14 @@ onMounted(() => {
     </div>
 
     <!-- Search and Legend -->
-    <div class="flex justify-between items-center mb-4 gap-4">
+    <div class="flex flex-col sm:flex-row justify-between items-stretch sm:items-center mb-4 gap-3 sm:gap-4">
       <!-- Search Input -->
-      <div class="flex-1 max-w-md">
+      <div class="flex-1 max-w-full sm:max-w-md">
         <input
           v-model="searchQuery"
           type="text"
           placeholder="テナント名で検索..."
-          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          class="w-full px-3 sm:px-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
         />
         <div v-if="searchQuery.trim() && searchMatchedTenants.length > 0" class="mt-1 text-xs text-gray-600">
           {{ searchMatchedTenants.length }}件のテナントが見つかりました
@@ -572,43 +624,46 @@ onMounted(() => {
       </div>
 
       <!-- Legend -->
-      <div class="flex gap-6 text-sm">
+      <div class="flex gap-4 sm:gap-6 text-xs sm:text-sm">
         <div class="flex items-center gap-2">
-          <div class="w-8 h-0.5 bg-red-500"></div>
-          <span class="text-gray-700">リアルタイム ({{ stats.realtimeConnections }})</span>
+          <div class="w-6 sm:w-8 h-0.5 bg-red-500"></div>
+          <span class="text-gray-700 whitespace-nowrap">リアルタイム ({{ stats.realtimeConnections }})</span>
         </div>
         <div class="flex items-center gap-2">
-          <div class="w-8 h-0.5 bg-blue-500 border-dashed" style="border-top: 1px dashed #3b82f6; background: none;"></div>
-          <span class="text-gray-700">通常 ({{ stats.normalConnections }})</span>
+          <div class="w-6 sm:w-8 h-0.5 bg-blue-500 border-dashed" style="border-top: 1px dashed #3b82f6; background: none;"></div>
+          <span class="text-gray-700 whitespace-nowrap">通常 ({{ stats.normalConnections }})</span>
         </div>
       </div>
     </div>
 
     <!-- Instructions -->
-    <div class="text-gray-500 text-xs italic mb-4">
-      💡 ズームボタンまたはスクロールでズーム • 背景をドラッグで移動 • ノードをドラッグで再配置 • ノードをクリックで関係をハイライト
+    <div class="text-gray-500 text-xs italic mb-4 hidden sm:block">
+      💡 ズームボタンまたはスクロールでズーム • 背景をドラッグで移動 • ノードをクリックで関係をハイライト
+    </div>
+    <div class="text-gray-500 text-xs italic mb-4 sm:hidden">
+      💡 ピンチでズーム • ドラッグで移動 • タップで詳細表示
     </div>
 
-    <div class="graph-container bg-white rounded-lg shadow-sm p-6 overflow-hidden relative">
+    <div class="graph-container bg-white rounded-lg shadow-sm p-3 sm:p-6 overflow-hidden relative">
       <!-- Zoom Controls -->
-      <div class="absolute top-4 right-4 flex flex-col gap-2 z-20">
+      <div class="absolute top-2 sm:top-4 right-2 sm:right-4 flex flex-col gap-1.5 sm:gap-2 z-20">
         <button
           @click="zoomIn"
-          class="w-10 h-10 bg-white rounded-lg shadow-md hover:shadow-lg border border-gray-200 flex items-center justify-center text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-all font-bold text-lg"
+          class="w-8 h-8 sm:w-10 sm:h-10 bg-white rounded-lg shadow-md hover:shadow-lg border border-gray-200 flex items-center justify-center text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-all font-bold text-base sm:text-lg"
           title="ズームイン"
         >
           +
         </button>
         <button
           @click="zoomOut"
-          class="w-10 h-10 bg-white rounded-lg shadow-md hover:shadow-lg border border-gray-200 flex items-center justify-center text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-all font-bold text-lg"
+          class="w-8 h-8 sm:w-10 sm:h-10 bg-white rounded-lg shadow-md hover:shadow-lg border border-gray-200 flex items-center justify-center text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-all font-bold text-base sm:text-lg"
           title="ズームアウト"
         >
           −
         </button>
         <button
           @click="resetZoom"
-          class="w-10 h-10 bg-white rounded-lg shadow-md hover:shadow-lg border border-gray-200 flex items-center justify-center text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-all font-bold text-lg"
+          class="w-8 h-8 sm:w-10 sm:h-10 bg-white rounded-lg shadow-md hover:shadow-lg border border-gray-200 flex items-center justify-center text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-all font-bold text-base sm:text-lg"
           title="リセット"
         >
           ⟲
@@ -618,61 +673,61 @@ onMounted(() => {
       <!-- Node Information Panel -->
       <div
         v-if="selectedNode"
-        class="node-info-panel absolute top-4 left-4 bg-white rounded-lg shadow-lg border-2 border-blue-500 p-4 max-w-sm z-10"
+        class="node-info-panel absolute top-2 left-2 sm:top-4 sm:left-4 bg-white rounded-lg shadow-lg border-2 border-blue-500 p-3 sm:p-4 max-w-[calc(100%-1rem)] sm:max-w-sm z-10"
       >
-        <div class="flex justify-between items-start mb-3">
-          <h4 class="text-base font-bold text-gray-900">{{ selectedNode.label }}</h4>
+        <div class="flex justify-between items-start mb-2 sm:mb-3">
+          <h4 class="text-sm sm:text-base font-bold text-gray-900 break-all pr-2">{{ selectedNode.label }}</h4>
           <button
             @click="selectedNode = null"
-            class="text-gray-400 hover:text-gray-600 transition-colors"
+            class="text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0"
             title="閉じる"
           >
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </div>
 
         <!-- Realtime Connections -->
-        <div v-if="selectedNodeConnections.realtime.length > 0" class="mb-3">
-          <div class="flex items-center gap-2 mb-2">
-            <div class="w-4 h-0.5 bg-red-500"></div>
-            <span class="text-sm font-semibold text-red-700">即時通知</span>
-            <span class="text-xs text-gray-500">({{ selectedNodeConnections.realtime.length }})</span>
+        <div v-if="selectedNodeConnections.realtime.length > 0" class="mb-2 sm:mb-3">
+          <div class="flex items-center gap-2 mb-1.5 sm:mb-2">
+            <div class="w-3 sm:w-4 h-0.5 bg-red-500"></div>
+            <span class="text-xs sm:text-sm font-semibold text-red-700">即時通知</span>
+            <span class="text-[10px] sm:text-xs text-gray-500">({{ selectedNodeConnections.realtime.length }})</span>
           </div>
-          <ul class="space-y-1 ml-6">
+          <ul class="space-y-1 ml-4 sm:ml-6">
             <li
               v-for="(conn, idx) in selectedNodeConnections.realtime"
               :key="`realtime-${idx}`"
-              class="text-sm text-gray-700 flex items-start gap-1"
+              class="text-xs sm:text-sm text-gray-700 flex items-start gap-1 break-all"
             >
-              <span class="text-red-500 text-xs mt-0.5">{{ conn.direction === 'outgoing' ? '→' : '←' }}</span>
-              <span>{{ conn.target }}</span>
+              <span class="text-red-500 text-xs mt-0.5 flex-shrink-0">{{ conn.direction === 'outgoing' ? '→' : '←' }}</span>
+              <span class="break-all">{{ conn.target }}</span>
             </li>
           </ul>
         </div>
 
         <!-- Normal Connections -->
         <div v-if="selectedNodeConnections.normal.length > 0">
-          <div class="flex items-center gap-2 mb-2">
-            <div class="w-4 h-0.5 bg-blue-500 border-dashed" style="border-top: 1px dashed #3b82f6; background: none;"></div>
-            <span class="text-sm font-semibold text-blue-700">他船通知</span>
-            <span class="text-xs text-gray-500">({{ selectedNodeConnections.normal.length }})</span>
+          <div class="flex items-center gap-2 mb-1.5 sm:mb-2">
+            <div class="w-3 sm:w-4 h-0.5 bg-blue-500 border-dashed" style="border-top: 1px dashed #3b82f6; background: none;"></div>
+            <span class="text-xs sm:text-sm font-semibold text-blue-700">他船通知</span>
+            <span class="text-[10px] sm:text-xs text-gray-500">({{ selectedNodeConnections.normal.length }})</span>
           </div>
-          <ul class="space-y-1 ml-6">
+          <ul class="space-y-1 ml-4 sm:ml-6">
             <li
               v-for="(conn, idx) in selectedNodeConnections.normal"
               :key="`normal-${idx}`"
-              class="text-sm text-gray-700 flex items-start gap-1"
+              class="text-xs sm:text-sm text-gray-700 flex items-start gap-1 break-all"
             >
-              <span class="text-blue-500 text-xs mt-0.5">{{ conn.direction === 'outgoing' ? '→' : '←' }}</span>
-              <span>{{ conn.target }}</span>
+              <span class="text-blue-500 text-xs mt-0.5 flex-shrink-0">{{ conn.direction === 'outgoing' ? '→' : '←' }}</span>
+              <span class="break-all">{{ conn.target }}</span>
             </li>
           </ul>
         </div>
 
         <!-- No connections message -->
-        <div v-if="selectedNodeConnections.realtime.length === 0 && selectedNodeConnections.normal.length === 0" class="text-sm text-gray-500 italic">
+        <div v-if="selectedNodeConnections.realtime.length === 0 && selectedNodeConnections.normal.length === 0" class="text-xs sm:text-sm text-gray-500 italic">
           接続がありません
         </div>
       </div>
@@ -681,10 +736,13 @@ onMounted(() => {
         ref="svgRef"
         :width="svgWidth"
         :height="svgHeight"
-        class="mx-auto cursor-grab"
+        class="mx-auto cursor-grab touch-none"
         :class="{ 'cursor-grabbing': isPanning }"
         @wheel="handleWheel"
         @mousedown="handleMouseDown"
+        @touchstart="handleTouchStart"
+        @touchmove="handleTouchMove"
+        @touchend="handleTouchEnd"
       >
         <!-- Background rect for pan detection -->
         <rect
@@ -773,7 +831,6 @@ onMounted(() => {
               :transform="`translate(${tenant.x}, ${tenant.y})`"
               :class="['node', getNodeClass(tenant)]"
               :opacity="getNodeOpacity(tenant)"
-              @mousedown="startNodeDrag($event, tenant)"
               @click="handleNodeClick($event, tenant)"
             >
               <circle
@@ -781,7 +838,7 @@ onMounted(() => {
                 fill="#ffffff"
                 stroke="#4b5563"
                 stroke-width="2"
-                class="cursor-move"
+                class="cursor-pointer"
               />
               <text
                 text-anchor="middle"
@@ -812,6 +869,12 @@ onMounted(() => {
   max-height: 1000px;
 }
 
+@media (max-width: 640px) {
+  .graph-container {
+    max-height: 600px;
+  }
+}
+
 svg {
   display: block;
   user-select: none;
@@ -822,7 +885,7 @@ svg {
 }
 
 .node circle {
-  cursor: move;
+  cursor: pointer;
   transition: all 0.2s ease;
 }
 
@@ -902,10 +965,6 @@ svg {
 
 .cursor-grabbing {
   cursor: grabbing;
-}
-
-.cursor-move {
-  cursor: move;
 }
 
 .pointer-events-none {

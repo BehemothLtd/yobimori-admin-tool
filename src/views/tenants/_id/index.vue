@@ -283,26 +283,26 @@ onMounted(async () => {
     <!-- Content -->
     <div v-else-if="tenant">
       <!-- Page Header with Actions -->
-      <div class="bg-gradient-to-r from-orange-50 to-red-50 rounded-xl p-6 mb-8 shadow-md border border-orange-100">
+      <div class="bg-gradient-to-r from-orange-50 to-red-50 rounded-xl p-4 sm:p-6 mb-6 sm:mb-8 shadow-md border border-orange-100">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div class="flex items-start gap-4">
-            <div class="flex h-16 w-16 items-center justify-center rounded-xl bg-gradient-to-br from-[#ef654d] to-[#ff8a65] shadow-lg">
-              <BusinessIcon class="text-3xl text-white" />
+          <div class="flex items-start gap-3 sm:gap-4 min-w-0">
+            <div class="flex h-12 w-12 sm:h-16 sm:w-16 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#ef654d] to-[#ff8a65] shadow-lg">
+              <BusinessIcon class="text-2xl sm:text-3xl text-white" />
             </div>
-            <div>
-              <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-1">{{ tenant.name }}</h1>
-              <p class="text-sm text-gray-600">テナント詳細情報</p>
-              <div class="mt-2 inline-flex items-center gap-2 px-3 py-1 bg-white rounded-full text-xs font-medium text-gray-600 shadow-sm">
+            <div class="min-w-0 flex-1">
+              <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-1 truncate">{{ tenant.name }}</h1>
+              <p class="text-xs sm:text-sm text-gray-600">テナント詳細情報</p>
+              <div class="mt-2 inline-flex items-center gap-2 px-2.5 sm:px-3 py-1 bg-white rounded-full text-xs font-medium text-gray-600 shadow-sm">
                 <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
                 アクティブ
               </div>
             </div>
           </div>
-          <div class="flex gap-3">
+          <div class="flex gap-3 w-full sm:w-auto">
             <BaseButton
               variant="primary"
               @click="router.push(`/tenants/${tenant.id}/accounts`)"
-              class="shadow-md hover:shadow-lg transition-all"
+              class="shadow-md hover:shadow-lg transition-all flex-1 sm:flex-initial text-sm sm:text-base"
             >
               アカウント一覧
             </BaseButton>
@@ -311,20 +311,20 @@ onMounted(async () => {
       </div>
 
       <!-- Tabs -->
-      <div class="mb-8">
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-2">
-          <nav class="flex gap-2" aria-label="Tabs">
+      <div class="mb-6 sm:mb-8">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-1.5 sm:p-2">
+          <nav class="flex gap-1.5 sm:gap-2" aria-label="Tabs">
             <button
               @click="activeTab = 'overview'"
               :class="[
                 activeTab === 'overview'
                   ? 'bg-gradient-to-r from-[#ef654d] to-[#ff8a65] text-white shadow-md shadow-orange-500/30'
                   : 'text-gray-600 hover:bg-gray-100',
-                'flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-semibold text-sm transition-all duration-200'
+                'flex-1 flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-6 py-2.5 sm:py-3 rounded-lg font-semibold text-xs sm:text-sm transition-all duration-200'
               ]"
             >
-              <span class="text-lg">📋</span>
-              <span>基本情報</span>
+              <span class="text-base sm:text-lg">📋</span>
+              <span class="hidden xs:inline">基本情報</span>
             </button>
             <button
               @click="activeTab = 'links'"
@@ -332,17 +332,17 @@ onMounted(async () => {
                 activeTab === 'links'
                   ? 'bg-gradient-to-r from-[#ef654d] to-[#ff8a65] text-white shadow-md shadow-orange-500/30'
                   : 'text-gray-600 hover:bg-gray-100',
-                'flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-semibold text-sm transition-all duration-200 relative'
+                'flex-1 flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-6 py-2.5 sm:py-3 rounded-lg font-semibold text-xs sm:text-sm transition-all duration-200 relative'
               ]"
             >
-              <span class="text-lg">🔗</span>
-              <span>リンクテナント</span>
+              <span class="text-base sm:text-lg">🔗</span>
+              <span class="hidden xs:inline">リンクテナント</span>
               <span
                 :class="[
                   activeTab === 'links'
                     ? 'bg-white text-orange-600'
                     : 'bg-orange-100 text-orange-600',
-                  'ml-1 px-2 py-0.5 text-xs rounded-full font-bold'
+                  'ml-1 px-1.5 sm:px-2 py-0.5 text-xs rounded-full font-bold'
                 ]"
               >
                 {{ linkedTenants.length }}
@@ -356,47 +356,47 @@ onMounted(async () => {
       <div class="mt-6">
         <!-- Overview Tab -->
         <div v-if="activeTab === 'overview'">
-          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
             <!-- Main Info Card -->
-            <div class="lg:col-span-2 bg-white rounded-xl shadow-md border border-gray-200 p-6 hover:shadow-lg transition-shadow">
-              <h3 class="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
-                <span class="w-1 h-6 bg-gradient-to-b from-[#ef654d] to-[#ff8a65] rounded-full"></span>
+            <div class="lg:col-span-2 bg-white rounded-xl shadow-md border border-gray-200 p-4 sm:p-6 hover:shadow-lg transition-shadow">
+              <h3 class="text-base sm:text-lg font-bold text-gray-900 mb-4 sm:mb-6 flex items-center gap-2">
+                <span class="w-1 h-5 sm:h-6 bg-gradient-to-b from-[#ef654d] to-[#ff8a65] rounded-full"></span>
                 基本情報
               </h3>
 
-              <div class="space-y-5">
+              <div class="space-y-4 sm:space-y-5">
                 <!-- Tenant ID -->
                 <div>
-                  <label class="block text-sm font-semibold text-gray-700 mb-2 text-left">
+                  <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-2 text-left">
                     テナントID
                   </label>
-                  <div class="px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg font-mono text-sm text-gray-900 break-all">
+                  <div class="px-3 sm:px-4 py-2.5 sm:py-3 bg-gray-50 border border-gray-200 rounded-lg font-mono text-xs sm:text-sm text-gray-900 break-all">
                     {{ tenant.id }}
                   </div>
                 </div>
 
                 <!-- Tenant Name -->
                 <div>
-                  <label class="block text-sm font-semibold text-gray-700 mb-2 text-left">
+                  <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-2 text-left">
                     テナント名 <span class="text-red-500">*</span>
                   </label>
                   <input
                     v-model="tenantForm.name"
                     type="text"
-                    class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all hover:border-gray-300"
+                    class="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all hover:border-gray-300"
                     placeholder="テナント名を入力"
                   />
                 </div>
 
                 <!-- Tenant Address -->
                 <div>
-                  <label class="block text-sm font-semibold text-gray-700 mb-2 text-left">
+                  <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-2 text-left">
                     住所 <span class="text-red-500">*</span>
                   </label>
                   <input
                     v-model="tenantForm.address"
                     type="text"
-                    class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all hover:border-gray-300"
+                    class="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all hover:border-gray-300"
                     placeholder="住所を入力"
                   />
                 </div>
@@ -407,7 +407,7 @@ onMounted(async () => {
                     variant="primary"
                     @click="handleUpdateTenant"
                     :disabled="isSaving || !tenantForm.name || !tenantForm.address"
-                    class="px-6 py-2.5 font-semibold shadow-md hover:shadow-lg transition-shadow"
+                    class="px-4 sm:px-6 py-2 sm:py-2.5 text-sm sm:text-base font-semibold shadow-md hover:shadow-lg transition-shadow w-full sm:w-auto"
                   >
                     <span v-if="isSaving">更新中...</span>
                     <span v-else>更新する</span>
@@ -417,31 +417,31 @@ onMounted(async () => {
             </div>
 
             <!-- Quick Stats Card -->
-            <div class="bg-gradient-to-br from-orange-50 to-red-50 rounded-xl shadow-md border border-orange-100 p-6">
-              <h3 class="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
-                <span class="w-1 h-6 bg-gradient-to-b from-[#ef654d] to-[#ff8a65] rounded-full"></span>
+            <div class="bg-gradient-to-br from-orange-50 to-red-50 rounded-xl shadow-md border border-orange-100 p-4 sm:p-6">
+              <h3 class="text-base sm:text-lg font-bold text-gray-900 mb-4 sm:mb-6 flex items-center gap-2">
+                <span class="w-1 h-5 sm:h-6 bg-gradient-to-b from-[#ef654d] to-[#ff8a65] rounded-full"></span>
                 クイック統計
               </h3>
 
-              <div class="space-y-4">
-                <div class="bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer" @click="activeTab = 'links'">
-                  <div class="text-2xl font-bold text-orange-600">{{ tenantStats.linkedTenantsCount }}</div>
-                  <div class="text-xs text-gray-600 mt-1">リンクテナント数</div>
+              <div class="grid grid-cols-2 sm:grid-cols-1 gap-3 sm:gap-4">
+                <div class="bg-white rounded-lg p-3 sm:p-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer" @click="activeTab = 'links'">
+                  <div class="text-xl sm:text-2xl font-bold text-orange-600">{{ tenantStats.linkedTenantsCount }}</div>
+                  <div class="text-[10px] sm:text-xs text-gray-600 mt-1">リンクテナント数</div>
                 </div>
 
-                <div class="bg-white rounded-lg p-4 shadow-sm">
-                  <div class="text-2xl font-bold text-green-600">{{ tenantStats.fisherUserCount }}</div>
-                  <div class="text-xs text-gray-600 mt-1">ユーザー数</div>
+                <div class="bg-white rounded-lg p-3 sm:p-4 shadow-sm">
+                  <div class="text-xl sm:text-2xl font-bold text-green-600">{{ tenantStats.fisherUserCount }}</div>
+                  <div class="text-[10px] sm:text-xs text-gray-600 mt-1">ユーザー数</div>
                 </div>
 
-                <div class="bg-white rounded-lg p-4 shadow-sm">
-                  <div class="text-2xl font-bold text-amber-600">{{ tenantStats.openAccidentCount }}</div>
-                  <div class="text-xs text-gray-600 mt-1">未解決事故</div>
+                <div class="bg-white rounded-lg p-3 sm:p-4 shadow-sm">
+                  <div class="text-xl sm:text-2xl font-bold text-amber-600">{{ tenantStats.openAccidentCount }}</div>
+                  <div class="text-[10px] sm:text-xs text-gray-600 mt-1">未解決事故</div>
                 </div>
 
-                <div class="bg-white rounded-lg p-4 shadow-sm">
-                  <div class="text-2xl font-bold text-purple-600">{{ tenantStats.totalAccidentCount }}</div>
-                  <div class="text-xs text-gray-600 mt-1">総事故数</div>
+                <div class="bg-white rounded-lg p-3 sm:p-4 shadow-sm">
+                  <div class="text-xl sm:text-2xl font-bold text-purple-600">{{ tenantStats.totalAccidentCount }}</div>
+                  <div class="text-[10px] sm:text-xs text-gray-600 mt-1">総事故数</div>
                 </div>
               </div>
             </div>
