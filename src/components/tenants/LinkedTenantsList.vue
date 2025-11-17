@@ -65,7 +65,8 @@ const onConnect = (params: any) => {
 };
 
 // Expanded nodes state - tracks which nodes have their children visible
-const expandedNodes = ref<Set<string>>(new Set([props.tenantId]));
+// Initialize immediately with tenantId so first render shows 2 levels
+const expandedNodes = ref<Set<string>>(new Set());
 
 // Initialize with first 2 levels expanded
 const initializeExpandedNodes = () => {
@@ -106,13 +107,23 @@ const getDescendants = (nodeId: string): string[] => {
 
 // Check if a node should be visible based on parent's expanded state
 const isNodeVisible = (node: TreeNode): boolean => {
-  if (!node.parentId) return true; // Root level always visible
-  const parentId = node.parentId === props.tenantId ? props.tenantId : node.parentId;
-  return expandedNodes.value.has(parentId);
+  if (node.parentId === 'root') {
+    // Level 1 nodes - check if root is expanded
+    const visible = expandedNodes.value.has(props.tenantId);
+    console.log(`🔍 isNodeVisible(${node.id}): parentId='root', tenantId=${props.tenantId}, expanded=${visible}`);
+    return visible;
+  }
+  // Other levels - check if parent is expanded
+  if (!node.parentId) return false;
+  return expandedNodes.value.has(node.parentId);
 };
 
 // Check if a node has children
 const hasChildren = (nodeId: string): boolean => {
+  // For root node, check if any node has parentId === 'root'
+  if (nodeId === props.tenantId) {
+    return fakeTreeData.value.some(n => n.parentId === 'root');
+  }
   return fakeTreeData.value.some(n => n.parentId === nodeId);
 };
 
@@ -144,9 +155,9 @@ interface TreeNode {
 
 const fakeTreeData = ref<TreeNode[]>([
   // Level 1 - Direct children of root
-  { id: "tenant-001", name: "鈴木マリン", address: "東京都千代田区", parentId: null, realtime: true, level: 1 },
-  { id: "tenant-002", name: "宮崎フィッシング", address: "東京都港区", parentId: null, realtime: false, level: 1 },
-  { id: "tenant-003", name: "山田水産", address: "東京都渋谷区", parentId: null, realtime: true, level: 1 },
+  { id: "tenant-001", name: "鈴木マリン", address: "東京都千代田区", parentId: "root", realtime: true, level: 1 },
+  { id: "tenant-002", name: "宮崎フィッシング", address: "東京都港区", parentId: "root", realtime: false, level: 1 },
+  { id: "tenant-003", name: "山田水産", address: "東京都渋谷区", parentId: "root", realtime: true, level: 1 },
   
   // Level 2 - Children of tenant-001
   { id: "tenant-001-1", name: "鈴木支部A", address: "千葉県船橋市", parentId: "tenant-001", realtime: true, level: 2 },
@@ -204,7 +215,7 @@ const fakeTreeData = ref<TreeNode[]>([
 const fakeLinkedTenants = computed(() => {
   return fakeTreeData.value.map((node, index) => ({
     id: `link-${index}`,
-    tenantId: node.parentId || props.tenantId,
+    tenantId: node.parentId === 'root' ? props.tenantId : (node.parentId || props.tenantId),
     linkedTenantId: node.id,
     realtime: node.realtime,
     createdAt: Date.now(),
@@ -222,6 +233,16 @@ const fakeLinkedTenants = computed(() => {
 
 // Create nodes and edges for the graph
 const nodes = computed(() => {
+  // Ensure expandedNodes is initialized on first render
+  if (expandedNodes.value.size === 0 && useFakeData.value) {
+    expandedNodes.value = new Set([props.tenantId]);
+    fakeTreeData.value.forEach(node => {
+      if (node.level === 1) {
+        expandedNodes.value.add(node.id);
+      }
+    });
+  }
+  
   const result = [];
   
   // Use fake data if enabled, otherwise use real data
@@ -251,7 +272,7 @@ const nodes = computed(() => {
       nodesByLevel.get(node.level)!.push(node);
       
       // Group by parent
-      const parentId = node.parentId || props.tenantId;
+      const parentId = node.parentId === 'root' ? props.tenantId : (node.parentId || props.tenantId);
       if (!childrenByParent.has(parentId)) {
         childrenByParent.set(parentId, []);
       }
@@ -302,7 +323,7 @@ const nodes = computed(() => {
   
   // Create root node
   const rootPos = positions.get(props.tenantId) || { x: 400, y: 50 };
-  const rootHasChildren = hasChildren(props.tenantId);
+  const rootHasChildren = false; // Root node should not show expand/collapse button
   const rootIsExpanded = expandedNodes.value.has(props.tenantId);
   
   result.push({
@@ -346,10 +367,18 @@ const nodes = computed(() => {
       const nodeHasChildren = hasChildren(node.id);
       const nodeIsExpanded = expandedNodes.value.has(node.id);
       
-      // Color based on connection type (realtime vs normal)
+      // Color based on level
+      const levelColors = [
+        { bg: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)", border: "#e91e63" }, // Level 1
+        { bg: "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)", border: "#03a9f4" }, // Level 2
+        { bg: "linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)", border: "#00bfa5" }, // Level 3
+        { bg: "linear-gradient(135deg, #fa709a 0%, #fee140 100%)", border: "#ff6090" }, // Level 4
+      ];
+      
+      const colorIndex = Math.min(node.level - 1, levelColors.length - 1);
       const colors = node.realtime 
         ? { bg: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)", border: "#e91e63" }
-        : { bg: "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)", border: "#03a9f4" };
+        : (levelColors[colorIndex] || levelColors[0]);
       
       result.push({
         id: node.id,
@@ -438,7 +467,7 @@ const edges = computed(() => {
     fakeTreeData.value.forEach(node => {
       if (!isNodeVisible(node)) return; // Skip if node is not visible
       
-      const sourceId = node.parentId || props.tenantId;
+      const sourceId = node.parentId === 'root' ? props.tenantId : (node.parentId || props.tenantId);
       const targetId = node.id;
       
       result.push({
@@ -569,6 +598,13 @@ const handleCreateLinkedTenant = (
 
 // Initialize expanded nodes on mount
 onMounted(() => {
+  initializeExpandedNodes();
+  console.log('🔍 Mounted - expandedNodes:', Array.from(expandedNodes.value));
+  console.log('🔍 Mounted - fakeTreeData level 1:', fakeTreeData.value.filter(n => n.level === 1).map(n => n.id));
+});
+
+// Watch useFakeData to reinitialize when toggled
+watch(useFakeData, () => {
   initializeExpandedNodes();
 });
 </script>
