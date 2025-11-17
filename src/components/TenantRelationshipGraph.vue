@@ -459,6 +459,33 @@ const reorganizeLayout = () => {
   calculateNodePositions();
 };
 
+// Get connections for selected node
+const selectedNodeConnections = computed(() => {
+  if (!selectedNode.value) return { realtime: [], normal: [] };
+
+  const nodeId = selectedNode.value.id;
+  const realtimeConns: { target: string; direction: 'outgoing' | 'incoming' }[] = [];
+  const normalConns: { target: string; direction: 'outgoing' | 'incoming' }[] = [];
+
+  connections.value.forEach((conn) => {
+    if (conn.from === nodeId) {
+      if (conn.type === 'realtime') {
+        realtimeConns.push({ target: conn.to, direction: 'outgoing' });
+      } else {
+        normalConns.push({ target: conn.to, direction: 'outgoing' });
+      }
+    } else if (conn.to === nodeId) {
+      if (conn.type === 'realtime') {
+        realtimeConns.push({ target: conn.from, direction: 'incoming' });
+      } else {
+        normalConns.push({ target: conn.from, direction: 'incoming' });
+      }
+    }
+  });
+
+  return { realtime: realtimeConns, normal: normalConns };
+});
+
 // Calculate statistics
 const stats = computed(() => {
   const realtimeCount = connections.value.filter((c) => c.type === "realtime").length;
@@ -539,7 +566,69 @@ onMounted(() => {
       💡 スクロールでズーム • 背景をドラッグで移動 • ノードをドラッグで再配置 • ノードをクリックで関係をハイライト
     </div>
 
-    <div class="graph-container bg-white rounded-lg shadow-sm p-6 overflow-hidden">
+    <div class="graph-container bg-white rounded-lg shadow-sm p-6 overflow-hidden relative">
+      <!-- Node Information Panel -->
+      <div
+        v-if="selectedNode"
+        class="node-info-panel absolute top-4 left-4 bg-white rounded-lg shadow-lg border-2 border-blue-500 p-4 max-w-sm z-10"
+      >
+        <div class="flex justify-between items-start mb-3">
+          <h4 class="text-base font-bold text-gray-900">{{ selectedNode.label }}</h4>
+          <button
+            @click="selectedNode = null"
+            class="text-gray-400 hover:text-gray-600 transition-colors"
+            title="閉じる"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <!-- Realtime Connections -->
+        <div v-if="selectedNodeConnections.realtime.length > 0" class="mb-3">
+          <div class="flex items-center gap-2 mb-2">
+            <div class="w-4 h-0.5 bg-red-500"></div>
+            <span class="text-sm font-semibold text-red-700">即時通知</span>
+            <span class="text-xs text-gray-500">({{ selectedNodeConnections.realtime.length }})</span>
+          </div>
+          <ul class="space-y-1 ml-6">
+            <li
+              v-for="(conn, idx) in selectedNodeConnections.realtime"
+              :key="`realtime-${idx}`"
+              class="text-sm text-gray-700 flex items-start gap-1"
+            >
+              <span class="text-red-500 text-xs mt-0.5">{{ conn.direction === 'outgoing' ? '→' : '←' }}</span>
+              <span>{{ conn.target }}</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Normal Connections -->
+        <div v-if="selectedNodeConnections.normal.length > 0">
+          <div class="flex items-center gap-2 mb-2">
+            <div class="w-4 h-0.5 bg-blue-500 border-dashed" style="border-top: 1px dashed #3b82f6; background: none;"></div>
+            <span class="text-sm font-semibold text-blue-700">他船通知</span>
+            <span class="text-xs text-gray-500">({{ selectedNodeConnections.normal.length }})</span>
+          </div>
+          <ul class="space-y-1 ml-6">
+            <li
+              v-for="(conn, idx) in selectedNodeConnections.normal"
+              :key="`normal-${idx}`"
+              class="text-sm text-gray-700 flex items-start gap-1"
+            >
+              <span class="text-blue-500 text-xs mt-0.5">{{ conn.direction === 'outgoing' ? '→' : '←' }}</span>
+              <span>{{ conn.target }}</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- No connections message -->
+        <div v-if="selectedNodeConnections.realtime.length === 0 && selectedNodeConnections.normal.length === 0" class="text-sm text-gray-500 italic">
+          接続がありません
+        </div>
+      </div>
+
       <svg
         ref="svgRef"
         :width="svgWidth"
@@ -777,5 +866,43 @@ svg {
 
 .select-none {
   user-select: none;
+}
+
+/* Node Information Panel */
+.node-info-panel {
+  animation: slideInFromLeft 0.3s ease-out;
+  backdrop-filter: blur(8px);
+  background: rgba(255, 255, 255, 0.98);
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+.node-info-panel::-webkit-scrollbar {
+  width: 6px;
+}
+
+.node-info-panel::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 3px;
+}
+
+.node-info-panel::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+.node-info-panel::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+@keyframes slideInFromLeft {
+  from {
+    transform: translateX(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
 }
 </style>
