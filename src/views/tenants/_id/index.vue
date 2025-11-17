@@ -398,6 +398,7 @@ onMounted(async () => {
       <!-- Linked Tenants Section -->
       <LinkedTenantsList
         :tenant-id="tenant.id"
+        :current-tenant-name="tenant.name"
         :linked-tenants="linkedTenants"
         :all-tenants="allTenants"
         :loading="isLoadingTenants"

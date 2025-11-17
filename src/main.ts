@@ -7,6 +7,12 @@ import router from "@/router";
 import Antd from "ant-design-vue";
 import "ant-design-vue/dist/reset.css";
 
+// Vue Flow styles
+import "@vue-flow/core/dist/style.css";
+import "@vue-flow/core/dist/theme-default.css";
+import "@vue-flow/controls/dist/style.css";
+import "@vue-flow/minimap/dist/style.css";
+
 // Amplify configuration disabled - no authentication needed
 // configureAmplify();
 
