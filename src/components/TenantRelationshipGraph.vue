@@ -415,6 +415,21 @@ const handleWheel = (event: WheelEvent) => {
   zoom.value = newZoom;
 };
 
+// Zoom control functions
+const zoomIn = () => {
+  zoom.value = Math.min(5, zoom.value * 1.2);
+};
+
+const zoomOut = () => {
+  zoom.value = Math.max(0.1, zoom.value / 1.2);
+};
+
+const resetZoom = () => {
+  zoom.value = 1;
+  panX.value = 0;
+  panY.value = 0;
+};
+
 // Pan handlers
 const handleMouseDown = (event: MouseEvent) => {
   if (event.target === svgRef.value || (event.target as SVGElement).classList.contains('background')) {
@@ -571,10 +586,35 @@ onMounted(() => {
 
     <!-- Instructions -->
     <div class="text-gray-500 text-xs italic mb-4">
-      💡 スクロールでズーム • 背景をドラッグで移動 • ノードをドラッグで再配置 • ノードをクリックで関係をハイライト
+      💡 ズームボタンまたはスクロールでズーム • 背景をドラッグで移動 • ノードをドラッグで再配置 • ノードをクリックで関係をハイライト
     </div>
 
     <div class="graph-container bg-white rounded-lg shadow-sm p-6 overflow-hidden relative">
+      <!-- Zoom Controls -->
+      <div class="absolute top-4 right-4 flex flex-col gap-2 z-20">
+        <button
+          @click="zoomIn"
+          class="w-10 h-10 bg-white rounded-lg shadow-md hover:shadow-lg border border-gray-200 flex items-center justify-center text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-all font-bold text-lg"
+          title="ズームイン"
+        >
+          +
+        </button>
+        <button
+          @click="zoomOut"
+          class="w-10 h-10 bg-white rounded-lg shadow-md hover:shadow-lg border border-gray-200 flex items-center justify-center text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-all font-bold text-lg"
+          title="ズームアウト"
+        >
+          −
+        </button>
+        <button
+          @click="resetZoom"
+          class="w-10 h-10 bg-white rounded-lg shadow-md hover:shadow-lg border border-gray-200 flex items-center justify-center text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-all font-bold text-lg"
+          title="リセット"
+        >
+          ⟲
+        </button>
+      </div>
+
       <!-- Node Information Panel -->
       <div
         v-if="selectedNode"
