@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, watch } from "vue";
 import tenantRelationshipsData from "@/data/tenantRelationships.json";
 
 interface Tenant {
@@ -335,6 +335,13 @@ const searchMatchedTenants = computed(() => {
     tenant.label.toLowerCase().includes(query)
   );
 });
+
+// Focus on node when exactly 1 search result
+const focusOnNode = (tenant: Tenant) => {
+  // Center the view on the tenant
+  panX.value = (svgWidth.value / 2 - tenant.x * zoom.value);
+  panY.value = (svgHeight.value / 2 - tenant.y * zoom.value);
+};
 
 // Check if a tenant matches search
 const isSearchMatched = (tenantId: string): boolean => {
@@ -674,6 +681,19 @@ onMounted(() => {
       fitGraphToView();
     }, 100);
   });
+});
+
+// Watch for search results - if exactly 1 match, focus on it
+watch(searchMatchedTenants, (newMatches) => {
+  if (newMatches.length === 1) {
+    const matchedNode = newMatches[0];
+    if (matchedNode) {
+      // Small delay to ensure the search highlighting is rendered
+      setTimeout(() => {
+        focusOnNode(matchedNode);
+      }, 100);
+    }
+  }
 });
 </script>
 
