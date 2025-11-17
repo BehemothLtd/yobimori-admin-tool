@@ -84,19 +84,19 @@ const getAlignClass = (align?: string) => {
 </script>
 
 <template>
-  <div class="w-full bg-white rounded-lg shadow-md overflow-hidden">
+  <div class="w-full bg-white rounded-2xl shadow-md border-2 border-orange-100 overflow-hidden">
     <div class="overflow-x-auto">
       <table class="min-w-full w-full">
         <!-- Table Head -->
-        <thead class="bg-gray-50 border-b border-gray-200">
+        <thead class="bg-gradient-to-r from-orange-50 via-white to-pink-50 border-b-2 border-orange-100">
           <tr>
             <!-- Checkbox Column -->
-            <th v-if="selectable" class="px-4 py-3 w-12">
+            <th v-if="selectable" class="px-6 py-4 w-12">
               <input
                 type="checkbox"
                 :checked="allSelected"
                 @change="toggleAll"
-                class="rounded border-gray-300 text-primary focus:ring-primary"
+                class="w-4 h-4 rounded border-2 border-gray-300 text-orange-600 focus:ring-2 focus:ring-orange-500 focus:ring-offset-0 cursor-pointer transition-all"
               />
             </th>
 
@@ -110,19 +110,19 @@ const getAlignClass = (align?: string) => {
                   : { minWidth: '150px' }
               "
               :class="[
-                'px-4 py-3 text-sm font-semibold text-gray-700',
+                'px-6 py-4 text-sm font-bold text-gray-800 uppercase tracking-wide',
                 getAlignClass(column.align),
                 column.width ? '' : 'w-auto',
               ]"
             >
               <div
-                class="flex items-center"
+                class="flex items-center gap-2"
                 :class="getAlignClass(column.align)"
               >
                 {{ column.label }}
                 <svg
                   v-if="column.sortable"
-                  class="w-4 h-4 ml-1 text-gray-400"
+                  class="w-4 h-4 text-gray-400 hover:text-orange-600 cursor-pointer transition-colors"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -142,22 +142,22 @@ const getAlignClass = (align?: string) => {
         <!-- Table Body -->
         <tbody
           v-if="!loading && data.length > 0"
-          class="divide-y divide-gray-200"
+          class="divide-y divide-gray-100"
         >
           <tr
             v-for="(row, rowIndex) in data"
             :key="rowIndex"
             @click="emit('row-click', row)"
-            class="hover:bg-gray-50 transition-colors duration-150 cursor-pointer"
+            class="hover:bg-gradient-to-r hover:from-orange-50 hover:to-pink-50 transition-all duration-200 cursor-pointer group"
           >
             <!-- Checkbox Cell -->
-            <td v-if="selectable" class="px-4 py-3">
+            <td v-if="selectable" class="px-6 py-4">
               <input
                 type="checkbox"
                 :checked="isRowSelected(row)"
                 @click.stop
                 @change="toggleRow(row)"
-                class="rounded border-gray-300 text-primary focus:ring-primary"
+                class="w-4 h-4 rounded border-2 border-gray-300 text-orange-600 focus:ring-2 focus:ring-orange-500 focus:ring-offset-0 cursor-pointer transition-all"
               />
             </td>
 
@@ -171,7 +171,7 @@ const getAlignClass = (align?: string) => {
                   : { minWidth: '150px' }
               "
               :class="[
-                'px-4 py-3 text-sm text-gray-900',
+                'px-6 py-4 text-sm text-gray-800',
                 getAlignClass(column.align),
                 column.width ? '' : 'w-auto',
               ]"
@@ -182,7 +182,7 @@ const getAlignClass = (align?: string) => {
                   v-if="typeof getCellValue(row, column) === 'object'"
                   :is="getCellValue(row, column)"
                 />
-                <span v-else>
+                <span v-else class="font-medium">
                   {{ getCellValue(row, column) }}
                 </span>
               </template>
@@ -192,14 +192,14 @@ const getAlignClass = (align?: string) => {
                 v-else-if="column.type === 'image'"
                 :src="getCellValue(row, column)"
                 :alt="column.label"
-                class="w-12 h-12 object-cover rounded"
+                class="w-12 h-12 object-cover rounded-lg border-2 border-gray-200"
               />
 
               <!-- Button -->
               <button
                 v-else-if="column.type === 'button'"
                 @click.stop="emit('cell-button-click', row, column)"
-                class="px-3 py-1 text-sm bg-primary text-white rounded hover:bg-primary/90 transition-colors"
+                class="px-4 py-2 text-sm font-semibold bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg hover:from-orange-600 hover:to-orange-700 transition-all duration-200 shadow-sm hover:shadow-md hover:scale-105"
               >
                 {{ getCellValue(row, column) }}
               </button>
@@ -209,7 +209,7 @@ const getAlignClass = (align?: string) => {
                 v-else-if="column.type === 'checkbox'"
                 type="checkbox"
                 :checked="getCellValue(row, column)"
-                class="rounded border-gray-300 text-primary focus:ring-primary"
+                class="w-4 h-4 rounded border-2 border-gray-300 text-orange-600 focus:ring-2 focus:ring-orange-500 focus:ring-offset-0 cursor-pointer"
                 @click.stop
               />
 
@@ -232,29 +232,14 @@ const getAlignClass = (align?: string) => {
           <tr>
             <td
               :colspan="columns.length + (selectable ? 1 : 0)"
-              class="px-4 py-12 text-center"
+              class="px-6 py-16 text-center"
             >
-              <div class="flex items-center justify-center">
-                <svg
-                  class="animate-spin h-8 w-8 text-primary"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle
-                    class="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    stroke-width="4"
-                  ></circle>
-                  <path
-                    class="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  ></path>
-                </svg>
-                <span class="ml-2 text-gray-600">読み込み中...</span>
+              <div class="flex flex-col items-center justify-center gap-3">
+                <div class="relative">
+                  <div class="w-12 h-12 border-4 border-orange-200 rounded-full"></div>
+                  <div class="w-12 h-12 border-4 border-orange-600 border-t-transparent rounded-full animate-spin absolute top-0 left-0"></div>
+                </div>
+                <span class="text-gray-600 font-medium">読み込み中...</span>
               </div>
             </td>
           </tr>
@@ -265,9 +250,17 @@ const getAlignClass = (align?: string) => {
           <tr>
             <td
               :colspan="columns.length + (selectable ? 1 : 0)"
-              class="px-4 py-12 text-center text-gray-500"
+              class="px-6 py-16 text-center"
             >
-              {{ emptyText }}
+              <div class="flex flex-col items-center justify-center gap-3">
+                <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
+                  <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
+                  </svg>
+                </div>
+                <span class="text-gray-600 font-semibold text-base">{{ emptyText }}</span>
+                <span class="text-gray-500 text-sm">検索条件を変更してお試しください</span>
+              </div>
             </td>
           </tr>
         </tbody>

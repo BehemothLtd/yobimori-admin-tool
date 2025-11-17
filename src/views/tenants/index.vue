@@ -7,17 +7,18 @@ import {
   PageHeader,
   BaseButton,
   TextField,
-  SearchForm,
   DataTable,
   LoadingSpinner,
   type TableColumn,
 } from "@/components/base";
 import BusinessIcon from "@/components/icons/BusinessIcon.vue";
 import TenantCard from "@/components/tenants/TenantCard.vue";
+import Pagination from "@/components/Pagination.vue";
 import {
   AppstoreOutlined,
   UnorderedListOutlined,
   PlusOutlined,
+  SearchOutlined,
 } from "@ant-design/icons-vue";
 import useTenants from "@/composable/useTenants";
 import type { Tenant } from "@/types/tenant";
@@ -154,64 +155,86 @@ onMounted(() => {
     />
 
     <!-- Search Form -->
-    <SearchForm :columns="1">
-      <template #fields>
-        <TextField
-          v-model="searchQuery"
-          label="テナント名で検索"
-          placeholder="テナント名を入力してください"
-          @keyup.enter="handleSearch"
-        />
-      </template>
-      <template #actions>
-        <BaseButton variant="primary" @click="handleSearch"> 検索 </BaseButton>
-        <BaseButton variant="secondary" @click="handleReset">
-          リセット
-        </BaseButton>
-      </template>
-    </SearchForm>
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+      <div class="flex flex-col sm:flex-row gap-4">
+        <div class="flex-1">
+          <TextField
+            v-model="searchQuery"
+            label="テナント名で検索"
+            placeholder="テナント名を入力してください"
+            @keyup.enter="handleSearch"
+          />
+        </div>
+        <div class="flex gap-3 sm:items-end">
+          <BaseButton variant="primary" @click="handleSearch" class="flex-1 sm:flex-none">
+            <SearchOutlined class="mr-2" />
+            検索
+          </BaseButton>
+          <BaseButton variant="secondary" @click="handleReset" class="flex-1 sm:flex-none">
+            リセット
+          </BaseButton>
+        </div>
+      </div>
+    </div>
 
-    <div class="flex justify-between items-center mb-6">
+    <!-- Toolbar -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 bg-white rounded-xl p-4 shadow-sm border border-gray-200">
       <!-- View Mode Toggle -->
       <div class="flex gap-2">
-        <a-button
-          :type="viewMode === 'list' ? 'primary' : 'default'"
-          size="large"
+        <button
           @click="viewMode = 'list'"
-          class="view-toggle-btn"
+          :class="[
+            'flex items-center gap-2 px-4 py-2.5 rounded-lg font-semibold text-sm transition-all duration-200',
+            viewMode === 'list'
+              ? 'bg-gradient-to-r from-[#ef654d] to-[#ff8a65] text-white shadow-md shadow-orange-500/30'
+              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+          ]"
         >
           <UnorderedListOutlined class="text-lg" />
-          <span class="button-text">リスト表示</span>
-        </a-button>
-        <a-button
-          :type="viewMode === 'grid' ? 'primary' : 'default'"
-          size="large"
+          <span class="hidden sm:inline">リスト表示</span>
+        </button>
+        <button
           @click="viewMode = 'grid'"
-          class="view-toggle-btn"
+          :class="[
+            'flex items-center gap-2 px-4 py-2.5 rounded-lg font-semibold text-sm transition-all duration-200',
+            viewMode === 'grid'
+              ? 'bg-gradient-to-r from-[#ef654d] to-[#ff8a65] text-white shadow-md shadow-orange-500/30'
+              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+          ]"
         >
           <AppstoreOutlined class="text-lg" />
-          <span class="button-text">グリッド表示</span>
-        </a-button>
+          <span class="hidden sm:inline">グリッド表示</span>
+        </button>
       </div>
 
       <!-- Create Button -->
-      <a-button
-        type="primary"
-        size="large"
+      <button
         @click="handleCreateTenant"
-        class="create-btn"
+        class="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg font-semibold text-sm shadow-md hover:shadow-lg hover:from-green-600 hover:to-green-700 transition-all duration-200 hover:scale-105 w-full sm:w-auto justify-center"
       >
         <PlusOutlined class="text-lg" />
-        <span class="button-text">テナント作成</span>
-      </a-button>
+        <span>テナント作成</span>
+      </button>
     </div>
 
     <!-- Loading State -->
     <LoadingSpinner v-if="isLoading" />
 
+    <!-- Top Pagination -->
+    <Pagination
+      v-if="!isLoading && tenantsData.length > 0"
+      :current-page="currentPage"
+      :page-size="pageSize"
+      :total-count="totalCount"
+      :display-count="tenantsData.length"
+      :show-pagination="!searchQuery"
+      @change="handlePageChange"
+      class="mb-4"
+    />
+
     <!-- List View (Table) -->
     <DataTable
-      v-else-if="viewMode === 'list'"
+      v-if="!isLoading && viewMode === 'list'"
       :columns="columns"
       :data="tenantsData"
       @row-click="handleRowClick"
@@ -220,7 +243,7 @@ onMounted(() => {
     />
 
     <!-- Grid View (Cards) -->
-    <div v-else-if="viewMode === 'grid'">
+    <div v-if="!isLoading && viewMode === 'grid'">
       <a-row :gutter="[24, 24]" v-if="tenantsData.length > 0">
         <a-col
           v-for="tenant in tenantsData"
@@ -234,56 +257,32 @@ onMounted(() => {
       </a-row>
       <div
         v-else
-        class="text-center py-16 bg-gray-50 rounded-xl border-2 border-dashed border-gray-300"
+        class="text-center py-20 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border-2 border-dashed border-gray-300"
       >
-        <p class="text-gray-600 text-lg">テナントが見つかりません</p>
+        <div class="flex flex-col items-center">
+          <div class="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mb-4">
+            <BusinessIcon class="text-3xl text-gray-400" />
+          </div>
+          <p class="text-gray-600 text-lg font-semibold mb-2">テナントが見つかりません</p>
+          <p class="text-gray-500 text-sm">検索条件を変更してお試しください</p>
+        </div>
       </div>
     </div>
 
-    <!-- Pagination -->
-    <div v-if="!isLoading && !searchQuery" class="mt-4 flex justify-center">
-      <a-pagination
-        v-model:current="currentPage"
-        :total="totalCount"
-        :page-size="pageSize"
-        :show-size-changer="false"
-        :show-total="(total: number) => `合計 ${total} 件以上`"
-        @change="handlePageChange"
-      />
-    </div>
-
-    <!-- Results Info -->
-    <div v-if="!isLoading && searchQuery" class="mt-4 text-sm text-gray-600">
-      {{ tenantsData.length }} 件のテナントが見つかりました
-    </div>
+    <!-- Bottom Pagination -->
+    <Pagination
+      v-if="!isLoading && tenantsData.length > 0"
+      :current-page="currentPage"
+      :page-size="pageSize"
+      :total-count="totalCount"
+      :display-count="tenantsData.length"
+      :show-pagination="!searchQuery"
+      @change="handlePageChange"
+      class="mt-6"
+    />
   </MainLayout>
 </template>
 
 <style scoped>
-.view-toggle-btn,
-.create-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.view-toggle-btn :deep(.anticon),
-.create-btn :deep(.anticon) {
-  font-size: 18px;
-}
-
-.button-text {
-  margin-left: 8px;
-}
-
-@media (max-width: 767px) {
-  .button-text {
-    display: none;
-  }
-
-  .view-toggle-btn :deep(.anticon),
-  .create-btn :deep(.anticon) {
-    margin: 0 !important;
-  }
-}
+/* Styles moved to Pagination component */
 </style>

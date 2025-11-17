@@ -69,25 +69,51 @@ const handleCreateLinkedTenant = (
 </script>
 
 <template>
-  <div class="w-full bg-white rounded-lg shadow-md p-4 sm:p-6">
-    <div class="flex items-center justify-between mb-4">
-      <h3 class="text-base sm:text-lg font-semibold text-gray-900">
-        リンクテナント一覧
-        <span class="text-sm font-normal text-gray-500 ml-2">
-          ({{ linkedTenants.length }}件)
-        </span>
-      </h3>
-      <BaseButton variant="primary" size="sm" @click="handleOpenCreateModal">
-        + 新規作成
-      </BaseButton>
+  <div class="w-full">
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-orange-50 to-red-50 rounded-xl p-6 mb-6 shadow-sm border border-orange-100">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br from-[#ef654d] to-[#ff8a65] shadow-md">
+            <span class="text-2xl">🔗</span>
+          </div>
+          <div>
+            <h3 class="text-xl font-bold text-gray-900">
+              リンクテナント一覧
+            </h3>
+            <p class="text-sm text-gray-600 mt-0.5">
+              {{ linkedTenants.length }}件のテナントがリンクされています
+            </p>
+          </div>
+        </div>
+        <button
+          @click="handleOpenCreateModal"
+          class="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-[#ef654d] to-[#ff8a65] text-white rounded-lg font-semibold text-sm shadow-md hover:shadow-lg hover:from-[#ff8a65] hover:to-[#ef654d] transition-all duration-200"
+        >
+          <span class="text-lg">+</span>
+          <span>新規作成</span>
+        </button>
+      </div>
     </div>
 
     <!-- Empty State -->
     <div
       v-if="linkedTenants.length === 0"
-      class="text-center py-8 text-gray-500"
+      class="bg-white rounded-xl border-2 border-dashed border-gray-300 p-12 text-center"
     >
-      リンクテナントがありません
+      <div class="flex flex-col items-center">
+        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+          <span class="text-3xl">🔗</span>
+        </div>
+        <p class="text-gray-600 text-lg font-semibold mb-2">リンクテナントがありません</p>
+        <p class="text-gray-500 text-sm mb-6">新しいテナントをリンクして連携を開始しましょう</p>
+        <button
+          @click="handleOpenCreateModal"
+          class="px-6 py-2.5 bg-gradient-to-r from-[#ef654d] to-[#ff8a65] text-white rounded-lg font-semibold text-sm shadow-md hover:shadow-lg transition-all"
+        >
+          + 最初のリンクテナントを作成
+        </button>
+      </div>
     </div>
 
     <!-- Linked Tenants List -->
@@ -95,62 +121,52 @@ const handleCreateLinkedTenant = (
       <div
         v-for="linkedTenant in linkedTenants"
         :key="linkedTenant.id"
-        class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+        class="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-lg transition-all duration-200 hover:border-orange-200"
       >
         <!-- Card Header -->
-        <div class="flex items-start justify-between mb-3">
+        <div class="flex items-start justify-between mb-4">
           <div class="flex-1">
-            <h4 class="text-start text-base font-semibold text-gray-900 mb-1">
+            <h4 class="text-lg font-bold text-gray-900 mb-2">
               {{ linkedTenant.tenant.name }}
             </h4>
-            <p class="text-start text-sm text-gray-600">
+            <p class="text-sm text-gray-600 flex items-center gap-2">
+              <span>📍</span>
               {{ linkedTenant.tenant.address }}
             </p>
           </div>
         </div>
 
         <!-- Card Details -->
-        <div class="space-y-2 mb-3">
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
-            <div class="text-start">
-              <span class="text-gray-600">テナントID:</span>
-              <span class="ml-2 text-gray-900 font-mono text-xs break-all">
-                {{ linkedTenant.tenant.id }}
-              </span>
-            </div>
+        <div class="bg-gray-50 rounded-lg p-4 mb-4">
+          <div class="flex items-center gap-2 text-sm">
+            <span class="text-gray-500 font-medium">テナントID:</span>
+            <span class="text-gray-900 font-mono text-xs break-all flex-1">
+              {{ linkedTenant.tenant.id }}
+            </span>
           </div>
         </div>
 
         <!-- Card Actions -->
-        <div
-          class="flex items-center justify-between pt-3 border-t border-gray-200"
-        >
+        <div class="flex items-center justify-between pt-4 border-t border-gray-200">
           <!-- Realtime Toggle -->
-          <div class="flex items-center gap-x-3">
+          <div class="flex items-center gap-3">
             <ToggleSwitch
               :model-value="linkedTenant.realtime"
               @update:model-value="handleToggleRealtime(linkedTenant)"
             />
-            <span class="text-sm" v-if="linkedTenant.realtime">
-              <span
-                :class="[
-                  'ml-2',
-                  linkedTenant.realtime ? 'text-primary' : 'text-gray-500',
-                ]"
-              >
-                即時通知連携
-              </span>
+            <span class="text-sm font-semibold text-gray-700">
+              即時通知連携
             </span>
           </div>
 
           <!-- Delete Button -->
-          <BaseButton
-            variant="danger"
-            size="sm"
+          <button
             @click="handleDeleteLinkedTenant(linkedTenant)"
+            class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-semibold text-sm shadow-sm hover:shadow-md transition-all duration-200 flex items-center gap-2"
           >
-            削除
-          </BaseButton>
+            <span>🗑️</span>
+            <span>削除</span>
+          </button>
         </div>
       </div>
     </div>

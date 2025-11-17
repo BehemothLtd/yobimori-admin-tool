@@ -31,3 +31,4 @@ src/gql/generated/
 *.sln
 *.sw?
 .vercel
+.claude/

@@ -5,6 +5,7 @@
 
 import type { FisherUser } from "@/types/account";
 import type { Tenant, LinkedTenant } from "@/types/tenant";
+import mockTenantsData from "@/data/mockTenants.json";
 
 // ==========================================
 // MOCK ACCOUNTS STORAGE
@@ -39,39 +40,16 @@ export const mockTenantsStorage = new Map<string, Tenant>();
 export const mockLinkedTenantsStorage = new Map<string, LinkedTenant>();
 
 /**
- * Initialize mock tenants with 100 sample tenants
+ * Initialize mock tenants from fixed JSON data
+ * This makes it easy to replace with real API calls later
  */
 export function initializeMockTenants(): void {
   if (mockTenantsStorage.size > 0) return; // Already initialized
 
-  const prefixes = [
-    "山田水産",
-    "田中漁業",
-    "佐藤海運",
-    "鈴木マリン",
-    "高橋フィッシング",
-  ];
-
-  for (let i = 1; i <= 100; i++) {
-    const id = `tenant-${String(i).padStart(3, "0")}-${Math.random()
-      .toString(36)
-      .substring(2, 11)}`;
-    const prefix = prefixes[i % prefixes.length];
-    const suffix = i > 1 ? ` ${i}` : "";
-
-    const tenant: Tenant = {
-      id,
-      name: `${prefix}${suffix}`,
-      address: `〒${100 + i}-${String(i * 11).padStart(
-        4,
-        "0"
-      )} 東京都港区${i}丁目${i}-${i}`,
-      createdAt: Date.now() - (100 - i) * 86400000,
-      updatedAt: Date.now() - (50 - (i % 50)) * 3600000,
-    };
-
-    mockTenantsStorage.set(id, tenant);
-  }
+  // Load tenants from fixed JSON file
+  mockTenantsData.forEach((tenant) => {
+    mockTenantsStorage.set(tenant.id, tenant as Tenant);
+  });
 }
 
 /**
