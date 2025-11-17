@@ -1,202 +1,202 @@
 {
-  "tenant_001": {
-    "realtime": ["tenant_002", "tenant_005", "tenant_012"],
-    "normal": ["tenant_003", "tenant_008", "tenant_015", "tenant_020"]
+  "東京本社": {
+    "realtime": ["大阪支社", "横浜物流センター", "名古屋テクノロジーハブ"],
+    "normal": ["福岡営業所", "仙台ロジスティクスセンター", "京都研究所", "札幌イノベーション拠点"]
   },
-  "tenant_002": {
-    "realtime": ["tenant_001", "tenant_007", "tenant_018"],
-    "normal": ["tenant_009", "tenant_014", "tenant_025"]
+  "大阪支社": {
+    "realtime": ["東京本社", "神戸製造工場", "奈良カスタマーサービス"],
+    "normal": ["広島営業所", "岡山オペレーションセンター", "静岡組立ライン"]
   },
-  "tenant_003": {
-    "realtime": ["tenant_004", "tenant_010"],
-    "normal": ["tenant_001", "tenant_006", "tenant_013", "tenant_022", "tenant_030"]
+  "横浜物流センター": {
+    "realtime": ["東京本社", "川崎倉庫施設"],
+    "normal": ["千葉加工工場", "さいたま配送センター", "神奈川テックキャンパス", "群馬製造ハブ", "栃木保管デポ"]
   },
-  "tenant_004": {
-    "realtime": ["tenant_003", "tenant_011", "tenant_019"],
-    "normal": ["tenant_007", "tenant_016", "tenant_028"]
+  "名古屋テクノロジーハブ": {
+    "realtime": ["東京本社", "岐阜イノベーションラボ", "愛知開発センター"],
+    "normal": ["神戸製造工場", "三重製品テスト施設", "新潟エンジニアリングワークス"]
   },
-  "tenant_005": {
-    "realtime": ["tenant_001", "tenant_008", "tenant_015"],
-    "normal": ["tenant_012", "tenant_020", "tenant_027", "tenant_035"]
+  "福岡営業所": {
+    "realtime": ["東京本社", "仙台ロジスティクスセンター", "熊本サービスセンター"],
+    "normal": ["名古屋テクノロジーハブ", "鹿児島サポートオフィス", "沖縄リモート施設", "宮崎オペレーション拠点"]
   },
-  "tenant_006": {
-    "realtime": ["tenant_009", "tenant_017"],
-    "normal": ["tenant_003", "tenant_011", "tenant_024", "tenant_031"]
+  "京都研究所": {
+    "realtime": ["広島営業所", "奈良カスタマーサービス"],
+    "normal": ["横浜物流センター", "岐阜イノベーションラボ", "滋賀研究開発複合施設", "和歌山テストグラウンド"]
   },
-  "tenant_007": {
-    "realtime": ["tenant_002", "tenant_013", "tenant_021"],
-    "normal": ["tenant_004", "tenant_018", "tenant_026"]
+  "神戸製造工場": {
+    "realtime": ["大阪支社", "名古屋テクノロジーハブ", "岡山オペレーションセンター"],
+    "normal": ["東京本社", "奈良カスタマーサービス", "兵庫生産ライン"]
   },
-  "tenant_008": {
-    "realtime": ["tenant_005", "tenant_014", "tenant_022"],
-    "normal": ["tenant_001", "tenant_010", "tenant_029", "tenant_036"]
+  "仙台ロジスティクスセンター": {
+    "realtime": ["福岡営業所", "札幌イノベーション拠点", "山形倉庫"],
+    "normal": ["東京本社", "川崎倉庫施設", "岩手配送ハブ", "秋田保管複合施設"]
   },
-  "tenant_009": {
-    "realtime": ["tenant_006", "tenant_016", "tenant_023"],
-    "normal": ["tenant_002", "tenant_019", "tenant_032"]
+  "広島営業所": {
+    "realtime": ["京都研究所", "三重製品テスト施設", "島根支店"],
+    "normal": ["大阪支社", "愛知開発センター", "鳥取サービスポイント"]
   },
-  "tenant_010": {
-    "realtime": ["tenant_003", "tenant_015", "tenant_024"],
-    "normal": ["tenant_008", "tenant_017", "tenant_033", "tenant_040"]
+  "川崎倉庫施設": {
+    "realtime": ["横浜物流センター", "熊本サービスセンター", "静岡組立ライン"],
+    "normal": ["仙台ロジスティクスセンター", "奈良カスタマーサービス", "福島加工センター", "宮城デポ"]
   },
-  "tenant_011": {
-    "realtime": ["tenant_004", "tenant_018", "tenant_025"],
-    "normal": ["tenant_006", "tenant_020", "tenant_034"]
+  "岐阜イノベーションラボ": {
+    "realtime": ["名古屋テクノロジーハブ", "奈良カスタマーサービス", "石川テクノロジーセンター"],
+    "normal": ["京都研究所", "岡山オペレーションセンター", "富山研究施設"]
   },
-  "tenant_012": {
-    "realtime": ["tenant_001", "tenant_019", "tenant_026"],
-    "normal": ["tenant_005", "tenant_021", "tenant_037", "tenant_041"]
+  "札幌イノベーション拠点": {
+    "realtime": ["東京本社", "愛知開発センター", "函館支店"],
+    "normal": ["福岡営業所", "岡山オペレーションセンター", "旭川リージョナルハブ", "釧路サービスオフィス"]
   },
-  "tenant_013": {
-    "realtime": ["tenant_007", "tenant_020", "tenant_027"],
-    "normal": ["tenant_003", "tenant_022", "tenant_038"]
+  "岡山オペレーションセンター": {
+    "realtime": ["神戸製造工場", "鹿児島サポートオフィス", "徳島ファシリティ"],
+    "normal": ["大阪支社", "札幌イノベーション拠点", "愛媛オペレーション拠点"]
   },
-  "tenant_014": {
-    "realtime": ["tenant_008", "tenant_021", "tenant_028"],
-    "normal": ["tenant_002", "tenant_023", "tenant_039", "tenant_042"]
+  "さいたま配送センター": {
+    "realtime": ["仙台ロジスティクスセンター", "沖縄リモート施設", "茨城デポ"],
+    "normal": ["横浜物流センター", "静岡組立ライン", "栃木保管デポ", "群馬製造ハブ"]
   },
-  "tenant_015": {
-    "realtime": ["tenant_005", "tenant_010", "tenant_029"],
-    "normal": ["tenant_001", "tenant_024", "tenant_043"]
+  "熊本サービスセンター": {
+    "realtime": ["福岡営業所", "川崎倉庫施設", "佐賀支店"],
+    "normal": ["東京本社", "静岡組立ライン", "長崎サポートセンター"]
   },
-  "tenant_016": {
-    "realtime": ["tenant_009", "tenant_022", "tenant_030"],
-    "normal": ["tenant_004", "tenant_025", "tenant_044", "tenant_045"]
+  "三重製品テスト施設": {
+    "realtime": ["広島営業所", "静岡組立ライン", "和歌山テストグラウンド"],
+    "normal": ["名古屋テクノロジーハブ", "石川テクノロジーセンター", "福井ラボラトリー", "滋賀研究開発複合施設"]
   },
-  "tenant_017": {
-    "realtime": ["tenant_006", "tenant_023", "tenant_031"],
-    "normal": ["tenant_010", "tenant_026", "tenant_046"]
+  "奈良カスタマーサービス": {
+    "realtime": ["大阪支社", "岐阜イノベーションラボ", "和歌山テストグラウンド"],
+    "normal": ["京都研究所", "川崎倉庫施設", "兵庫生産ライン", "島根支店"]
   },
-  "tenant_018": {
-    "realtime": ["tenant_002", "tenant_011", "tenant_032"],
-    "normal": ["tenant_007", "tenant_027", "tenant_047", "tenant_048"]
+  "愛知開発センター": {
+    "realtime": ["名古屋テクノロジーハブ", "札幌イノベーション拠点", "富山研究施設"],
+    "normal": ["広島営業所", "新潟エンジニアリングワークス", "福井ラボラトリー", "石川テクノロジーセンター"]
   },
-  "tenant_019": {
-    "realtime": ["tenant_004", "tenant_012", "tenant_033"],
-    "normal": ["tenant_009", "tenant_028", "tenant_049"]
+  "千葉加工工場": {
+    "realtime": ["横浜物流センター", "名古屋テクノロジーハブ", "茨城デポ"],
+    "normal": ["広島営業所", "新潟エンジニアリングワークス", "栃木保管デポ"]
   },
-  "tenant_020": {
-    "realtime": ["tenant_013", "tenant_024", "tenant_034"],
-    "normal": ["tenant_001", "tenant_011", "tenant_029", "tenant_050"]
+  "鹿児島サポートオフィス": {
+    "realtime": ["岡山オペレーションセンター", "静岡組立ライン", "宮崎オペレーション拠点"],
+    "normal": ["福岡営業所", "石川テクノロジーセンター", "沖縄リモート施設"]
   },
-  "tenant_021": {
-    "realtime": ["tenant_007", "tenant_014", "tenant_035"],
-    "normal": ["tenant_012", "tenant_030", "tenant_036"]
+  "静岡組立ライン": {
+    "realtime": ["仙台ロジスティクスセンター", "三重製品テスト施設", "山梨プラント"],
+    "normal": ["大阪支社", "川崎倉庫施設", "富山研究施設", "長崎サポートセンター"]
   },
-  "tenant_022": {
-    "realtime": ["tenant_008", "tenant_016", "tenant_036"],
-    "normal": ["tenant_003", "tenant_013", "tenant_031", "tenant_037"]
+  "島根支店": {
+    "realtime": ["広島営業所", "和歌山テストグラウンド", "鳥取サービスポイント"],
+    "normal": ["奈良カスタマーサービス", "静岡組立ライン", "愛媛オペレーション拠点"]
   },
-  "tenant_023": {
-    "realtime": ["tenant_009", "tenant_017", "tenant_037"],
-    "normal": ["tenant_014", "tenant_032", "tenant_038"]
+  "石川テクノロジーセンター": {
+    "realtime": ["岐阜イノベーションラボ", "滋賀研究開発複合施設", "福井ラボラトリー"],
+    "normal": ["三重製品テスト施設", "愛知開発センター", "鹿児島サポートオフィス", "富山研究施設"]
   },
-  "tenant_024": {
-    "realtime": ["tenant_010", "tenant_020", "tenant_038"],
-    "normal": ["tenant_006", "tenant_015", "tenant_033", "tenant_039"]
+  "神奈川テックキャンパス": {
+    "realtime": ["川崎倉庫施設", "富山研究施設", "山梨プラント"],
+    "normal": ["横浜物流センター", "岡山オペレーションセンター", "福井ラボラトリー", "新潟エンジニアリングワークス"]
   },
-  "tenant_025": {
-    "realtime": ["tenant_011", "tenant_026", "tenant_039"],
-    "normal": ["tenant_002", "tenant_016", "tenant_034", "tenant_040"]
+  "沖縄リモート施設": {
+    "realtime": ["さいたま配送センター", "宮崎オペレーション拠点", "熊本サービスセンター"],
+    "normal": ["福岡営業所", "鹿児島サポートオフィス", "長崎サポートセンター", "東京本社"]
   },
-  "tenant_026": {
-    "realtime": ["tenant_012", "tenant_025", "tenant_040"],
-    "normal": ["tenant_007", "tenant_017", "tenant_035", "tenant_041"]
+  "新潟エンジニアリングワークス": {
+    "realtime": ["熊本サービスセンター", "富山研究施設"],
+    "normal": ["名古屋テクノロジーハブ", "愛知開発センター", "千葉加工工場", "福井ラボラトリー"]
   },
-  "tenant_027": {
-    "realtime": ["tenant_013", "tenant_028", "tenant_041"],
-    "normal": ["tenant_005", "tenant_018", "tenant_036", "tenant_042"]
+  "兵庫生産ライン": {
+    "realtime": ["石川テクノロジーセンター", "和歌山テストグラウンド"],
+    "normal": ["神戸製造工場", "奈良カスタマーサービス", "滋賀研究開発複合施設", "鳥取サービスポイント"]
   },
-  "tenant_028": {
-    "realtime": ["tenant_014", "tenant_027", "tenant_042"],
-    "normal": ["tenant_004", "tenant_019", "tenant_037", "tenant_043"]
+  "群馬製造ハブ": {
+    "realtime": ["さいたま配送センター", "山梨プラント", "福井ラボラトリー"],
+    "normal": ["横浜物流センター", "新潟エンジニアリングワークス", "富山研究施設", "東京本社"]
   },
-  "tenant_029": {
-    "realtime": ["tenant_015", "tenant_030", "tenant_043"],
-    "normal": ["tenant_008", "tenant_020", "tenant_038", "tenant_044"]
+  "栃木保管デポ": {
+    "realtime": ["川崎倉庫施設", "茨城デポ", "福島加工センター"],
+    "normal": ["横浜物流センター", "さいたま配送センター", "千葉加工工場", "大阪支社"]
   },
-  "tenant_030": {
-    "realtime": ["tenant_016", "tenant_029", "tenant_044"],
-    "normal": ["tenant_003", "tenant_021", "tenant_039", "tenant_045"]
+  "宮崎オペレーション拠点": {
+    "realtime": ["沖縄リモート施設", "長崎サポートセンター", "佐賀支店"],
+    "normal": ["福岡営業所", "鹿児島サポートオフィス", "熊本サービスセンター", "仙台ロジスティクスセンター"]
   },
-  "tenant_031": {
-    "realtime": ["tenant_017", "tenant_032", "tenant_045"],
-    "normal": ["tenant_006", "tenant_022", "tenant_040", "tenant_046"]
+  "富山研究施設": {
+    "realtime": ["新潟エンジニアリングワークス", "神奈川テックキャンパス"],
+    "normal": ["岐阜イノベーションラボ", "愛知開発センター", "静岡組立ライン", "石川テクノロジーセンター"]
   },
-  "tenant_032": {
-    "realtime": ["tenant_018", "tenant_031", "tenant_046"],
-    "normal": ["tenant_009", "tenant_023", "tenant_041", "tenant_047"]
+  "滋賀研究開発複合施設": {
+    "realtime": ["石川テクノロジーセンター", "和歌山テストグラウンド"],
+    "normal": ["京都研究所", "三重製品テスト施設", "兵庫生産ライン", "福井ラボラトリー"]
   },
-  "tenant_033": {
-    "realtime": ["tenant_019", "tenant_034", "tenant_047"],
-    "normal": ["tenant_010", "tenant_024", "tenant_042", "tenant_048"]
+  "和歌山テストグラウンド": {
+    "realtime": ["奈良カスタマーサービス", "滋賀研究開発複合施設"],
+    "normal": ["京都研究所", "三重製品テスト施設", "島根支店", "兵庫生産ライン"]
   },
-  "tenant_034": {
-    "realtime": ["tenant_020", "tenant_033", "tenant_048"],
-    "normal": ["tenant_011", "tenant_025", "tenant_043", "tenant_049"]
+  "福井ラボラトリー": {
+    "realtime": ["石川テクノロジーセンター", "群馬製造ハブ"],
+    "normal": ["三重製品テスト施設", "神奈川テックキャンパス", "新潟エンジニアリングワークス", "富山研究施設"]
   },
-  "tenant_035": {
-    "realtime": ["tenant_021", "tenant_036", "tenant_049"],
-    "normal": ["tenant_005", "tenant_026", "tenant_044", "tenant_050"]
+  "鳥取サービスポイント": {
+    "realtime": ["島根支店", "愛媛オペレーション拠点"],
+    "normal": ["広島営業所", "兵庫生産ライン", "徳島ファシリティ", "山口オフィス"]
   },
-  "tenant_036": {
-    "realtime": ["tenant_022", "tenant_035", "tenant_050"],
-    "normal": ["tenant_008", "tenant_021", "tenant_027", "tenant_045"]
+  "山梨プラント": {
+    "realtime": ["静岡組立ライン", "群馬製造ハブ"],
+    "normal": ["神奈川テックキャンパス", "千葉加工工場", "茨城デポ", "長野ファシリティ"]
   },
-  "tenant_037": {
-    "realtime": ["tenant_023", "tenant_038"],
-    "normal": ["tenant_012", "tenant_022", "tenant_028", "tenant_046"]
+  "茨城デポ": {
+    "realtime": ["さいたま配送センター", "栃木保管デポ"],
+    "normal": ["千葉加工工場", "山梨プラント", "福島加工センター", "宮城デポ"]
   },
-  "tenant_038": {
-    "realtime": ["tenant_024", "tenant_037"],
-    "normal": ["tenant_013", "tenant_023", "tenant_029", "tenant_047"]
+  "福島加工センター": {
+    "realtime": ["栃木保管デポ", "宮城デポ"],
+    "normal": ["川崎倉庫施設", "茨城デポ", "山形倉庫", "東京本社"]
   },
-  "tenant_039": {
-    "realtime": ["tenant_025", "tenant_040"],
-    "normal": ["tenant_014", "tenant_024", "tenant_030", "tenant_048"]
+  "宮城デポ": {
+    "realtime": ["福島加工センター", "山形倉庫"],
+    "normal": ["川崎倉庫施設", "仙台ロジスティクスセンター", "岩手配送ハブ", "秋田保管複合施設"]
   },
-  "tenant_040": {
-    "realtime": ["tenant_026", "tenant_039"],
-    "normal": ["tenant_010", "tenant_025", "tenant_031", "tenant_049"]
+  "山形倉庫": {
+    "realtime": ["仙台ロジスティクスセンター", "宮城デポ"],
+    "normal": ["福島加工センター", "秋田保管複合施設", "岩手配送ハブ", "東京本社"]
   },
-  "tenant_041": {
-    "realtime": ["tenant_027", "tenant_042"],
-    "normal": ["tenant_012", "tenant_026", "tenant_032", "tenant_050"]
+  "岩手配送ハブ": {
+    "realtime": ["山形倉庫", "秋田保管複合施設"],
+    "normal": ["仙台ロジスティクスセンター", "宮城デポ", "青森支店", "函館支店"]
   },
-  "tenant_042": {
-    "realtime": ["tenant_028", "tenant_041"],
-    "normal": ["tenant_014", "tenant_027", "tenant_033", "tenant_001"]
+  "秋田保管複合施設": {
+    "realtime": ["岩手配送ハブ", "青森支店"],
+    "normal": ["仙台ロジスティクスセンター", "山形倉庫", "宮城デポ", "函館支店"]
   },
-  "tenant_043": {
-    "realtime": ["tenant_029", "tenant_044"],
-    "normal": ["tenant_015", "tenant_028", "tenant_034", "tenant_002"]
+  "徳島ファシリティ": {
+    "realtime": ["岡山オペレーションセンター", "愛媛オペレーション拠点"],
+    "normal": ["高知サービスセンター", "鳥取サービスポイント", "香川支店", "島根支店"]
   },
-  "tenant_044": {
-    "realtime": ["tenant_030", "tenant_043"],
-    "normal": ["tenant_016", "tenant_029", "tenant_035", "tenant_003"]
+  "愛媛オペレーション拠点": {
+    "realtime": ["徳島ファシリティ", "鳥取サービスポイント"],
+    "normal": ["岡山オペレーションセンター", "島根支店", "高知サービスセンター", "山口オフィス"]
   },
-  "tenant_045": {
-    "realtime": ["tenant_031", "tenant_046"],
-    "normal": ["tenant_016", "tenant_030", "tenant_036", "tenant_004"]
+  "長崎サポートセンター": {
+    "realtime": ["宮崎オペレーション拠点", "佐賀支店"],
+    "normal": ["熊本サービスセンター", "静岡組立ライン", "沖縄リモート施設", "福岡営業所"]
   },
-  "tenant_046": {
-    "realtime": ["tenant_032", "tenant_045"],
-    "normal": ["tenant_017", "tenant_031", "tenant_037", "tenant_005"]
+  "佐賀支店": {
+    "realtime": ["熊本サービスセンター", "長崎サポートセンター"],
+    "normal": ["宮崎オペレーション拠点", "福岡営業所", "大分オペレーション", "鹿児島サポートオフィス"]
   },
-  "tenant_047": {
-    "realtime": ["tenant_033", "tenant_048"],
-    "normal": ["tenant_018", "tenant_032", "tenant_038", "tenant_006"]
+  "青森支店": {
+    "realtime": ["秋田保管複合施設", "函館支店"],
+    "normal": ["岩手配送ハブ", "札幌イノベーション拠点", "仙台ロジスティクスセンター", "東京本社"]
   },
-  "tenant_048": {
-    "realtime": ["tenant_034", "tenant_047"],
-    "normal": ["tenant_018", "tenant_033", "tenant_039", "tenant_007"]
+  "函館支店": {
+    "realtime": ["札幌イノベーション拠点", "青森支店"],
+    "normal": ["岩手配送ハブ", "秋田保管複合施設", "釧路サービスオフィス", "旭川リージョナルハブ"]
   },
-  "tenant_049": {
-    "realtime": ["tenant_035", "tenant_050"],
-    "normal": ["tenant_019", "tenant_034", "tenant_040", "tenant_008"]
+  "釧路サービスオフィス": {
+    "realtime": ["旭川リージョナルハブ", "函館支店"],
+    "normal": ["札幌イノベーション拠点", "青森支店", "東京本社", "仙台ロジスティクスセンター"]
   },
-  "tenant_050": {
-    "realtime": ["tenant_036", "tenant_049"],
-    "normal": ["tenant_020", "tenant_035", "tenant_041", "tenant_009"]
+  "旭川リージョナルハブ": {
+    "realtime": ["釧路サービスオフィス", "札幌イノベーション拠点"],
+    "normal": ["函館支店", "青森支店", "東京本社", "仙台ロジスティクスセンター"]
   }
 }

@@ -45,6 +45,9 @@ const dragOffsetY = ref(0);
 // Selection state
 const selectedNode = ref<Tenant | null>(null);
 
+// Search state
+const searchQuery = ref("");
+
 // SVG ref
 const svgRef = ref<SVGSVGElement | null>(null);
 
@@ -56,7 +59,7 @@ const loadTenantData = () => {
   // Create tenant nodes
   tenants.value = tenantIds.map((id) => ({
     id,
-    label: id.replace("tenant_", ""),
+    label: id, // Use full name instead of ID
     x: 0,
     y: 0,
   }));
@@ -296,6 +299,33 @@ const transform = computed(() => {
   return `translate(${panX.value}, ${panY.value}) scale(${zoom.value})`;
 });
 
+// Find tenants matching search query
+const searchMatchedTenants = computed(() => {
+  if (!searchQuery.value.trim()) return [];
+  const query = searchQuery.value.toLowerCase();
+  return tenants.value.filter((tenant) =>
+    tenant.label.toLowerCase().includes(query)
+  );
+});
+
+// Check if a tenant matches search
+const isSearchMatched = (tenantId: string): boolean => {
+  if (!searchQuery.value.trim()) return false;
+  return searchMatchedTenants.value.some((t) => t.id === tenantId);
+};
+
+// Check if a tenant is connected to any search-matched tenant
+const isConnectedToSearchMatched = (tenantId: string): boolean => {
+  if (!searchQuery.value.trim()) return false;
+  if (isSearchMatched(tenantId)) return true; // The matched node itself
+
+  return connections.value.some((conn) => {
+    const matchedFrom = isSearchMatched(conn.from);
+    const matchedTo = isSearchMatched(conn.to);
+    return (matchedFrom && conn.to === tenantId) || (matchedTo && conn.from === tenantId);
+  });
+};
+
 // Check if a node is connected to the selected node
 const isConnectedToSelected = (tenantId: string): boolean => {
   if (!selectedNode.value) return false;
@@ -314,20 +344,43 @@ const isConnectionHighlighted = (from: string, to: string): boolean => {
   return from === selectedNode.value.id || to === selectedNode.value.id;
 };
 
-// Get node opacity based on selection
+// Check if a connection involves a search-matched node
+const isConnectionSearchMatched = (from: string, to: string): boolean => {
+  if (!searchQuery.value.trim()) return false;
+  return isSearchMatched(from) || isSearchMatched(to);
+};
+
+// Get node opacity based on selection or search
 const getNodeOpacity = (tenant: Tenant): number => {
+  // Search has priority
+  if (searchQuery.value.trim()) {
+    return isConnectedToSearchMatched(tenant.id) ? 1 : 0.2;
+  }
+  // Then selection
   if (!selectedNode.value) return 1;
   return isConnectedToSelected(tenant.id) ? 1 : 0.2;
 };
 
-// Get connection opacity based on selection
+// Get connection opacity based on selection or search
 const getConnectionOpacity = (from: string, to: string, baseOpacity: number): number => {
+  // Search highlighting - show connections involving matched nodes
+  if (searchQuery.value.trim()) {
+    return isConnectionSearchMatched(from, to) ? baseOpacity : 0.1;
+  }
+  // Selection highlighting
   if (!selectedNode.value) return baseOpacity;
   return isConnectionHighlighted(from, to) ? baseOpacity : 0.1;
 };
 
 // Get node highlight class
 const getNodeClass = (tenant: Tenant): string => {
+  // Search highlighting
+  if (searchQuery.value.trim()) {
+    if (isSearchMatched(tenant.id)) return 'search-matched';
+    if (isConnectedToSearchMatched(tenant.id)) return 'connected';
+    return 'dimmed';
+  }
+  // Selection highlighting
   if (!selectedNode.value) return '';
   if (tenant.id === selectedNode.value.id) return 'selected';
   if (isConnectedToSelected(tenant.id)) return 'connected';
@@ -431,54 +484,59 @@ onMounted(() => {
 <template>
   <div class="tenant-relationship-graph">
     <div class="flex justify-between items-center mb-4">
-      <h3 class="text-xl font-semibold text-gray-800">Tenant Relationships Network</h3>
+      <h3 class="text-xl font-semibold text-gray-800">テナント関係ネットワーク</h3>
 
-      <!-- Stats and Controls -->
-      <div class="flex gap-4 items-center">
-        <div class="flex gap-4 text-sm">
-          <div class="flex items-center gap-2">
-            <span class="font-medium text-gray-600">Tenants:</span>
-            <span class="font-bold text-gray-900">{{ stats.totalTenants }}</span>
-          </div>
-          <div class="flex items-center gap-2">
-            <span class="font-medium text-gray-600">Connections:</span>
-            <span class="font-bold text-gray-900">{{ stats.totalConnections }}</span>
-          </div>
-          <div class="flex items-center gap-2">
-            <span class="font-medium text-gray-600">Zoom:</span>
-            <span class="font-bold text-gray-900">{{ (zoom * 100).toFixed(0) }}%</span>
-          </div>
+      <!-- Stats -->
+      <div class="flex gap-4 text-sm">
+        <div class="flex items-center gap-2">
+          <span class="font-medium text-gray-600">テナント数:</span>
+          <span class="font-bold text-gray-900">{{ stats.totalTenants }}</span>
         </div>
-        <div class="flex gap-2">
-          <button
-            @click="reorganizeLayout"
-            class="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
-          >
-            Reorganize
-          </button>
-          <button
-            @click="resetView"
-            class="px-3 py-1 text-sm bg-gray-800 text-white rounded hover:bg-gray-700 transition-colors"
-          >
-            Reset View
-          </button>
+        <div class="flex items-center gap-2">
+          <span class="font-medium text-gray-600">接続数:</span>
+          <span class="font-bold text-gray-900">{{ stats.totalConnections }}</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="font-medium text-gray-600">ズーム:</span>
+          <span class="font-bold text-gray-900">{{ (zoom * 100).toFixed(0) }}%</span>
         </div>
       </div>
     </div>
 
-    <!-- Legend -->
-    <div class="flex gap-6 mb-4 text-sm">
-      <div class="flex items-center gap-2">
-        <div class="w-8 h-0.5 bg-red-500"></div>
-        <span class="text-gray-700">Realtime ({{ stats.realtimeConnections }})</span>
+    <!-- Search and Legend -->
+    <div class="flex justify-between items-center mb-4 gap-4">
+      <!-- Search Input -->
+      <div class="flex-1 max-w-md">
+        <input
+          v-model="searchQuery"
+          type="text"
+          placeholder="テナント名で検索..."
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        />
+        <div v-if="searchQuery.trim() && searchMatchedTenants.length > 0" class="mt-1 text-xs text-gray-600">
+          {{ searchMatchedTenants.length }}件のテナントが見つかりました
+        </div>
+        <div v-else-if="searchQuery.trim() && searchMatchedTenants.length === 0" class="mt-1 text-xs text-red-600">
+          該当するテナントが見つかりません
+        </div>
       </div>
-      <div class="flex items-center gap-2">
-        <div class="w-8 h-0.5 bg-blue-500 border-dashed" style="border-top: 1px dashed #3b82f6; background: none;"></div>
-        <span class="text-gray-700">Normal ({{ stats.normalConnections }})</span>
+
+      <!-- Legend -->
+      <div class="flex gap-6 text-sm">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-0.5 bg-red-500"></div>
+          <span class="text-gray-700">リアルタイム ({{ stats.realtimeConnections }})</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-0.5 bg-blue-500 border-dashed" style="border-top: 1px dashed #3b82f6; background: none;"></div>
+          <span class="text-gray-700">通常 ({{ stats.normalConnections }})</span>
+        </div>
       </div>
-      <div class="text-gray-500 text-xs italic">
-        💡 Scroll to zoom • Drag background to pan • Drag nodes to reposition • Click nodes to highlight connections
-      </div>
+    </div>
+
+    <!-- Instructions -->
+    <div class="text-gray-500 text-xs italic mb-4">
+      💡 スクロールでズーム • 背景をドラッグで移動 • ノードをドラッグで再配置 • ノードをクリックで関係をハイライト
     </div>
 
     <div class="graph-container bg-white rounded-lg shadow-sm p-6 overflow-hidden">
@@ -584,17 +642,17 @@ onMounted(() => {
               <circle
                 :r="nodeRadius"
                 fill="#ffffff"
-                stroke="#1f2937"
+                stroke="#4b5563"
                 stroke-width="2"
                 class="cursor-move"
               />
               <text
                 text-anchor="middle"
                 dominant-baseline="middle"
-                font-size="10"
+                font-size="8"
                 font-weight="600"
-                fill="#1f2937"
-                class="pointer-events-none select-none"
+                fill="#1e3a8a"
+                class="pointer-events-none select-none node-label"
               >
                 {{ tenant.label }}
               </text>
@@ -632,13 +690,19 @@ svg {
 }
 
 .node:hover circle {
-  fill: #f3f4f6;
+  fill: #eff6ff;
+  stroke: #3b82f6;
   stroke-width: 3;
 }
 
 .node:hover text {
-  font-size: 12px;
+  font-size: 10px;
   font-weight: 700;
+  fill: #1e40af;
+}
+
+.node-label {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
 }
 
 /* Selection states */
@@ -651,17 +715,44 @@ svg {
 
 .node.selected text {
   font-weight: 700;
-  font-size: 11px;
+  font-size: 9px;
+  fill: #92400e;
 }
 
 .node.connected circle {
-  fill: #e0f2fe;
-  stroke: #0284c7;
+  fill: #dbeafe;
+  stroke: #2563eb;
   stroke-width: 2.5;
 }
 
 .node.connected text {
   font-weight: 600;
+  font-size: 8px;
+  fill: #1e40af;
+}
+
+/* Search matched state */
+.node.search-matched circle {
+  fill: #dcfce7;
+  stroke: #16a34a;
+  stroke-width: 3;
+  filter: drop-shadow(0 0 10px rgba(22, 163, 74, 0.7));
+  animation: pulse-green 1.5s ease-in-out infinite;
+}
+
+.node.search-matched text {
+  font-weight: 700;
+  font-size: 9px;
+  fill: #166534;
+}
+
+@keyframes pulse-green {
+  0%, 100% {
+    filter: drop-shadow(0 0 10px rgba(22, 163, 74, 0.7));
+  }
+  50% {
+    filter: drop-shadow(0 0 20px rgba(22, 163, 74, 1));
+  }
 }
 
 .node.dimmed {
