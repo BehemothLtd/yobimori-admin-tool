@@ -1,0 +1,202 @@
+{
+  "tenant_001": {
+    "realtime": ["tenant_002", "tenant_005", "tenant_012"],
+    "normal": ["tenant_003", "tenant_008", "tenant_015", "tenant_020"]
+  },
+  "tenant_002": {
+    "realtime": ["tenant_001", "tenant_007", "tenant_018"],
+    "normal": ["tenant_009", "tenant_014", "tenant_025"]
+  },
+  "tenant_003": {
+    "realtime": ["tenant_004", "tenant_010"],
+    "normal": ["tenant_001", "tenant_006", "tenant_013", "tenant_022", "tenant_030"]
+  },
+  "tenant_004": {
+    "realtime": ["tenant_003", "tenant_011", "tenant_019"],
+    "normal": ["tenant_007", "tenant_016", "tenant_028"]
+  },
+  "tenant_005": {
+    "realtime": ["tenant_001", "tenant_008", "tenant_015"],
+    "normal": ["tenant_012", "tenant_020", "tenant_027", "tenant_035"]
+  },
+  "tenant_006": {
+    "realtime": ["tenant_009", "tenant_017"],
+    "normal": ["tenant_003", "tenant_011", "tenant_024", "tenant_031"]
+  },
+  "tenant_007": {
+    "realtime": ["tenant_002", "tenant_013", "tenant_021"],
+    "normal": ["tenant_004", "tenant_018", "tenant_026"]
+  },
+  "tenant_008": {
+    "realtime": ["tenant_005", "tenant_014", "tenant_022"],
+    "normal": ["tenant_001", "tenant_010", "tenant_029", "tenant_036"]
+  },
+  "tenant_009": {
+    "realtime": ["tenant_006", "tenant_016", "tenant_023"],
+    "normal": ["tenant_002", "tenant_019", "tenant_032"]
+  },
+  "tenant_010": {
+    "realtime": ["tenant_003", "tenant_015", "tenant_024"],
+    "normal": ["tenant_008", "tenant_017", "tenant_033", "tenant_040"]
+  },
+  "tenant_011": {
+    "realtime": ["tenant_004", "tenant_018", "tenant_025"],
+    "normal": ["tenant_006", "tenant_020", "tenant_034"]
+  },
+  "tenant_012": {
+    "realtime": ["tenant_001", "tenant_019", "tenant_026"],
+    "normal": ["tenant_005", "tenant_021", "tenant_037", "tenant_041"]
+  },
+  "tenant_013": {
+    "realtime": ["tenant_007", "tenant_020", "tenant_027"],
+    "normal": ["tenant_003", "tenant_022", "tenant_038"]
+  },
+  "tenant_014": {
+    "realtime": ["tenant_008", "tenant_021", "tenant_028"],
+    "normal": ["tenant_002", "tenant_023", "tenant_039", "tenant_042"]
+  },
+  "tenant_015": {
+    "realtime": ["tenant_005", "tenant_010", "tenant_029"],
+    "normal": ["tenant_001", "tenant_024", "tenant_043"]
+  },
+  "tenant_016": {
+    "realtime": ["tenant_009", "tenant_022", "tenant_030"],
+    "normal": ["tenant_004", "tenant_025", "tenant_044", "tenant_045"]
+  },
+  "tenant_017": {
+    "realtime": ["tenant_006", "tenant_023", "tenant_031"],
+    "normal": ["tenant_010", "tenant_026", "tenant_046"]
+  },
+  "tenant_018": {
+    "realtime": ["tenant_002", "tenant_011", "tenant_032"],
+    "normal": ["tenant_007", "tenant_027", "tenant_047", "tenant_048"]
+  },
+  "tenant_019": {
+    "realtime": ["tenant_004", "tenant_012", "tenant_033"],
+    "normal": ["tenant_009", "tenant_028", "tenant_049"]
+  },
+  "tenant_020": {
+    "realtime": ["tenant_013", "tenant_024", "tenant_034"],
+    "normal": ["tenant_001", "tenant_011", "tenant_029", "tenant_050"]
+  },
+  "tenant_021": {
+    "realtime": ["tenant_007", "tenant_014", "tenant_035"],
+    "normal": ["tenant_012", "tenant_030", "tenant_036"]
+  },
+  "tenant_022": {
+    "realtime": ["tenant_008", "tenant_016", "tenant_036"],
+    "normal": ["tenant_003", "tenant_013", "tenant_031", "tenant_037"]
+  },
+  "tenant_023": {
+    "realtime": ["tenant_009", "tenant_017", "tenant_037"],
+    "normal": ["tenant_014", "tenant_032", "tenant_038"]
+  },
+  "tenant_024": {
+    "realtime": ["tenant_010", "tenant_020", "tenant_038"],
+    "normal": ["tenant_006", "tenant_015", "tenant_033", "tenant_039"]
+  },
+  "tenant_025": {
+    "realtime": ["tenant_011", "tenant_026", "tenant_039"],
+    "normal": ["tenant_002", "tenant_016", "tenant_034", "tenant_040"]
+  },
+  "tenant_026": {
+    "realtime": ["tenant_012", "tenant_025", "tenant_040"],
+    "normal": ["tenant_007", "tenant_017", "tenant_035", "tenant_041"]
+  },
+  "tenant_027": {
+    "realtime": ["tenant_013", "tenant_028", "tenant_041"],
+    "normal": ["tenant_005", "tenant_018", "tenant_036", "tenant_042"]
+  },
+  "tenant_028": {
+    "realtime": ["tenant_014", "tenant_027", "tenant_042"],
+    "normal": ["tenant_004", "tenant_019", "tenant_037", "tenant_043"]
+  },
+  "tenant_029": {
+    "realtime": ["tenant_015", "tenant_030", "tenant_043"],
+    "normal": ["tenant_008", "tenant_020", "tenant_038", "tenant_044"]
+  },
+  "tenant_030": {
+    "realtime": ["tenant_016", "tenant_029", "tenant_044"],
+    "normal": ["tenant_003", "tenant_021", "tenant_039", "tenant_045"]
+  },
+  "tenant_031": {
+    "realtime": ["tenant_017", "tenant_032", "tenant_045"],
+    "normal": ["tenant_006", "tenant_022", "tenant_040", "tenant_046"]
+  },
+  "tenant_032": {
+    "realtime": ["tenant_018", "tenant_031", "tenant_046"],
+    "normal": ["tenant_009", "tenant_023", "tenant_041", "tenant_047"]
+  },
+  "tenant_033": {
+    "realtime": ["tenant_019", "tenant_034", "tenant_047"],
+    "normal": ["tenant_010", "tenant_024", "tenant_042", "tenant_048"]
+  },
+  "tenant_034": {
+    "realtime": ["tenant_020", "tenant_033", "tenant_048"],
+    "normal": ["tenant_011", "tenant_025", "tenant_043", "tenant_049"]
+  },
+  "tenant_035": {
+    "realtime": ["tenant_021", "tenant_036", "tenant_049"],
+    "normal": ["tenant_005", "tenant_026", "tenant_044", "tenant_050"]
+  },
+  "tenant_036": {
+    "realtime": ["tenant_022", "tenant_035", "tenant_050"],
+    "normal": ["tenant_008", "tenant_021", "tenant_027", "tenant_045"]
+  },
+  "tenant_037": {
+    "realtime": ["tenant_023", "tenant_038"],
+    "normal": ["tenant_012", "tenant_022", "tenant_028", "tenant_046"]
+  },
+  "tenant_038": {
+    "realtime": ["tenant_024", "tenant_037"],
+    "normal": ["tenant_013", "tenant_023", "tenant_029", "tenant_047"]
+  },
+  "tenant_039": {
+    "realtime": ["tenant_025", "tenant_040"],
+    "normal": ["tenant_014", "tenant_024", "tenant_030", "tenant_048"]
+  },
+  "tenant_040": {
+    "realtime": ["tenant_026", "tenant_039"],
+    "normal": ["tenant_010", "tenant_025", "tenant_031", "tenant_049"]
+  },
+  "tenant_041": {
+    "realtime": ["tenant_027", "tenant_042"],
+    "normal": ["tenant_012", "tenant_026", "tenant_032", "tenant_050"]
+  },
+  "tenant_042": {
+    "realtime": ["tenant_028", "tenant_041"],
+    "normal": ["tenant_014", "tenant_027", "tenant_033", "tenant_001"]
+  },
+  "tenant_043": {
+    "realtime": ["tenant_029", "tenant_044"],
+    "normal": ["tenant_015", "tenant_028", "tenant_034", "tenant_002"]
+  },
+  "tenant_044": {
+    "realtime": ["tenant_030", "tenant_043"],
+    "normal": ["tenant_016", "tenant_029", "tenant_035", "tenant_003"]
+  },
+  "tenant_045": {
+    "realtime": ["tenant_031", "tenant_046"],
+    "normal": ["tenant_016", "tenant_030", "tenant_036", "tenant_004"]
+  },
+  "tenant_046": {
+    "realtime": ["tenant_032", "tenant_045"],
+    "normal": ["tenant_017", "tenant_031", "tenant_037", "tenant_005"]
+  },
+  "tenant_047": {
+    "realtime": ["tenant_033", "tenant_048"],
+    "normal": ["tenant_018", "tenant_032", "tenant_038", "tenant_006"]
+  },
+  "tenant_048": {
+    "realtime": ["tenant_034", "tenant_047"],
+    "normal": ["tenant_018", "tenant_033", "tenant_039", "tenant_007"]
+  },
+  "tenant_049": {
+    "realtime": ["tenant_035", "tenant_050"],
+    "normal": ["tenant_019", "tenant_034", "tenant_040", "tenant_008"]
+  },
+  "tenant_050": {
+    "realtime": ["tenant_036", "tenant_049"],
+    "normal": ["tenant_020", "tenant_035", "tenant_041", "tenant_009"]
+  }
+}

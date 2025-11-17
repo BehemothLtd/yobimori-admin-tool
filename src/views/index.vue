@@ -2,6 +2,7 @@
 import { ref, onMounted } from "vue";
 import MainLayout from "@/components/MainLayout.vue";
 import StatisticsCards from "@/components/StatisticsCards.vue";
+import TenantRelationshipGraph from "@/components/TenantRelationshipGraph.vue";
 import useStatistics from "@/composable/useStatistics";
 
 const { getDashboardStats } = useStatistics();
@@ -47,6 +48,11 @@ onMounted(async () => {
     <!-- Statistics Cards Section -->
     <div class="mb-12 sm:mb-16">
       <StatisticsCards :stats="dashboardStats" :loading="loading" />
+    </div>
+
+    <!-- Tenant Relationship Graph Section -->
+    <div class="mb-12 sm:mb-16">
+      <TenantRelationshipGraph />
     </div>
   </MainLayout>
 </template>
