@@ -24,7 +24,7 @@ interface TenantRelationships {
 
 const svgWidth = ref(1600);
 const svgHeight = ref(1200);
-const nodeRadius = 20;
+const nodeRadius = ref(20);
 
 const tenants = ref<Tenant[]>([]);
 const connections = ref<Connection[]>([]);
@@ -44,6 +44,10 @@ const touchStartZoom = ref(1);
 
 // Selection state
 const selectedNode = ref<Tenant | null>(null);
+
+// Minimap dimensions
+const minimapWidth = 200;
+const minimapHeight = 150;
 
 // Search state
 const searchQuery = ref("");
@@ -94,18 +98,21 @@ const calculateNodePositions = () => {
   const centerX = svgWidth.value / 2;
   const centerY = svgHeight.value / 2;
 
-  // Initialize random positions
+  // Check if mobile
+  const isMobile = window.innerWidth < 640;
+
+  // Initialize random positions with much larger spread on mobile
   tenants.value.forEach((tenant, i) => {
     const angle = (i / tenants.value.length) * 2 * Math.PI + Math.random() * 0.5;
-    const radius = 250 + Math.random() * 200;
+    const radius = isMobile ? 500 + Math.random() * 500 : 250 + Math.random() * 200;
     tenant.x = centerX + radius * Math.cos(angle);
     tenant.y = centerY + radius * Math.sin(angle);
   });
 
   // Force-directed layout parameters
   const iterations = 300;
-  const repulsionStrength = 12000;
-  const attractionStrength = 0.004;
+  const repulsionStrength = isMobile ? 50000 : 12000; // Much stronger repulsion on mobile
+  const attractionStrength = isMobile ? 0.002 : 0.004; // Weaker attraction on mobile
   const dampening = 0.8;
 
   // Velocity for each node
@@ -164,7 +171,8 @@ const calculateNodePositions = () => {
 
         if (dist < 0.01) return; // Skip if too close
 
-        const idealDistance = 250;
+        const isMobileCheck = window.innerWidth < 640;
+        const idealDistance = isMobileCheck ? 600 : 250; // Much larger distance on mobile
         const force = (dist - idealDistance) * attractionStrength;
         const fx = (dx / dist) * force;
         const fy = (dy / dist) * force;
@@ -295,10 +303,10 @@ const getArrowPath = (
   const angle = Math.atan2(dy, dx);
   const distance = Math.sqrt(dx * dx + dy * dy);
 
-  const fromX = fromNode.x + nodeRadius * Math.cos(angle);
-  const fromY = fromNode.y + nodeRadius * Math.sin(angle);
-  const toX = toNode.x - (nodeRadius + 5) * Math.cos(angle);
-  const toY = toNode.y - (nodeRadius + 5) * Math.sin(angle);
+  const fromX = fromNode.x + nodeRadius.value * Math.cos(angle);
+  const fromY = fromNode.y + nodeRadius.value * Math.sin(angle);
+  const toX = toNode.x - (nodeRadius.value + 5) * Math.cos(angle);
+  const toY = toNode.y - (nodeRadius.value + 5) * Math.sin(angle);
 
   if (curveDirection === "straight") {
     return `M ${fromX} ${fromY} L ${toX} ${toY}`;
@@ -407,14 +415,6 @@ const getNodeClass = (tenant: Tenant): string => {
   return 'dimmed';
 };
 
-// Zoom handlers
-const handleWheel = (event: WheelEvent) => {
-  event.preventDefault();
-  const delta = event.deltaY > 0 ? 0.9 : 1.1;
-  const newZoom = Math.max(0.1, Math.min(5, zoom.value * delta));
-  zoom.value = newZoom;
-};
-
 // Zoom control functions
 const zoomIn = () => {
   zoom.value = Math.min(5, zoom.value * 1.2);
@@ -425,9 +425,7 @@ const zoomOut = () => {
 };
 
 const resetZoom = () => {
-  zoom.value = 1;
-  panX.value = 0;
-  panY.value = 0;
+  fitGraphToView();
 };
 
 // Pan handlers
@@ -553,6 +551,90 @@ const stats = computed(() => {
   };
 });
 
+// Minimap scale factor
+const minimapScale = computed(() => {
+  const scaleX = minimapWidth / svgWidth.value;
+  const scaleY = minimapHeight / svgHeight.value;
+  return Math.min(scaleX, scaleY);
+});
+
+// Minimap viewport rectangle
+const minimapViewport = computed(() => {
+  const scale = minimapScale.value;
+  const viewportWidth = svgWidth.value * scale / zoom.value;
+  const viewportHeight = svgHeight.value * scale / zoom.value;
+  const viewportX = -panX.value * scale / zoom.value;
+  const viewportY = -panY.value * scale / zoom.value;
+
+  return {
+    x: viewportX,
+    y: viewportY,
+    width: viewportWidth,
+    height: viewportHeight,
+  };
+});
+
+// Handle minimap click to navigate
+const handleMinimapClick = (event: MouseEvent) => {
+  const minimapSvg = event.currentTarget as SVGSVGElement;
+  const rect = minimapSvg.getBoundingClientRect();
+  const clickX = event.clientX - rect.left;
+  const clickY = event.clientY - rect.top;
+
+  const scale = minimapScale.value;
+
+  // Convert minimap coordinates to main canvas coordinates
+  const mainX = clickX / scale;
+  const mainY = clickY / scale;
+
+  // Center the view on the clicked position
+  panX.value = -(mainX - svgWidth.value / 2) * zoom.value;
+  panY.value = -(mainY - svgHeight.value / 2) * zoom.value;
+};
+
+// Fit the entire graph into view
+const fitGraphToView = () => {
+  if (tenants.value.length === 0) return;
+
+  // Calculate bounding box of all nodes
+  let minX = Infinity;
+  let minY = Infinity;
+  let maxX = -Infinity;
+  let maxY = -Infinity;
+
+  tenants.value.forEach((tenant) => {
+    minX = Math.min(minX, tenant.x);
+    minY = Math.min(minY, tenant.y);
+    maxX = Math.max(maxX, tenant.x);
+    maxY = Math.max(maxY, tenant.y);
+  });
+
+  // Add padding around the graph
+  const padding = 100;
+  minX -= padding;
+  minY -= padding;
+  maxX += padding;
+  maxY += padding;
+
+  // Calculate the width and height of the bounding box
+  const graphWidth = maxX - minX;
+  const graphHeight = maxY - minY;
+
+  // Calculate the zoom level to fit the graph
+  const zoomX = svgWidth.value / graphWidth;
+  const zoomY = svgHeight.value / graphHeight;
+  const fitZoom = Math.min(zoomX, zoomY); // Use the calculated zoom to fit
+
+  // Calculate the center of the graph
+  const centerX = (minX + maxX) / 2;
+  const centerY = (minY + maxY) / 2;
+
+  // Set zoom and pan to center the graph
+  zoom.value = fitZoom;
+  panX.value = (svgWidth.value / 2 - centerX * fitZoom);
+  panY.value = (svgHeight.value / 2 - centerY * fitZoom);
+};
+
 // Update SVG dimensions based on container size
 const updateDimensions = () => {
   if (containerRef.value) {
@@ -562,6 +644,13 @@ const updateDimensions = () => {
     // Maintain aspect ratio but adapt to screen size
     svgWidth.value = Math.max(800, containerWidth);
     svgHeight.value = Math.max(600, containerHeight);
+
+    // Adjust node size for mobile
+    if (window.innerWidth < 640) {
+      nodeRadius.value = 30; // Larger nodes on mobile
+    } else {
+      nodeRadius.value = 20; // Normal size on desktop
+    }
   }
 };
 
@@ -570,16 +659,21 @@ onMounted(() => {
   updateDimensions();
   calculateNodePositions();
 
-  // Set initial zoom based on screen size
-  if (window.innerWidth < 640) {
-    // Mobile: zoom in by default
-    zoom.value = 1.5;
-  }
+  // Small delay to ensure dimensions are set before fitting
+  setTimeout(() => {
+    fitGraphToView();
+  }, 100);
 
   // Add global mouse event listeners
   window.addEventListener('mousemove', handleMouseMove);
   window.addEventListener('mouseup', handleMouseUp);
-  window.addEventListener('resize', updateDimensions);
+  window.addEventListener('resize', () => {
+    updateDimensions();
+    // Re-fit graph when window is resized
+    setTimeout(() => {
+      fitGraphToView();
+    }, 100);
+  });
 });
 </script>
 
@@ -638,7 +732,7 @@ onMounted(() => {
 
     <!-- Instructions -->
     <div class="text-gray-500 text-xs italic mb-4 hidden sm:block">
-      💡 ズームボタンまたはスクロールでズーム • 背景をドラッグで移動 • ノードをクリックで関係をハイライト
+      💡 ズームボタンでズーム • 背景をドラッグで移動 • ノードをクリックで関係をハイライト
     </div>
     <div class="text-gray-500 text-xs italic mb-4 sm:hidden">
       💡 ピンチでズーム • ドラッグで移動 • タップで詳細表示
@@ -738,7 +832,6 @@ onMounted(() => {
         :height="svgHeight"
         class="mx-auto cursor-grab touch-none"
         :class="{ 'cursor-grabbing': isPanning }"
-        @wheel="handleWheel"
         @mousedown="handleMouseDown"
         @touchstart="handleTouchStart"
         @touchmove="handleTouchMove"
@@ -837,13 +930,13 @@ onMounted(() => {
                 :r="nodeRadius"
                 fill="#ffffff"
                 stroke="#4b5563"
-                stroke-width="2"
+                :stroke-width="nodeRadius > 25 ? 3 : 2"
                 class="cursor-pointer"
               />
               <text
                 text-anchor="middle"
                 dominant-baseline="middle"
-                font-size="8"
+                :font-size="nodeRadius > 25 ? 12 : 8"
                 font-weight="600"
                 fill="#1e3a8a"
                 class="pointer-events-none select-none node-label"
@@ -854,6 +947,68 @@ onMounted(() => {
           </g>
         </g>
       </svg>
+
+      <!-- Minimap - Desktop only -->
+      <div class="hidden sm:block absolute bottom-4 right-4 bg-white rounded-lg shadow-lg border-2 border-gray-300 overflow-hidden z-10">
+        <svg
+          :width="minimapWidth"
+          :height="minimapHeight"
+          class="minimap cursor-pointer"
+          @click="handleMinimapClick"
+        >
+          <!-- Background -->
+          <rect
+            x="0"
+            y="0"
+            :width="minimapWidth"
+            :height="minimapHeight"
+            fill="#f9fafb"
+          />
+
+          <!-- Minimap content -->
+          <g :transform="`scale(${minimapScale})`">
+            <!-- Draw connections in minimap -->
+            <g class="minimap-connections">
+              <line
+                v-for="(conn, idx) in uniqueConnections"
+                :key="`minimap-conn-${idx}`"
+                :x1="tenants.find(t => t.id === conn.from)?.x || 0"
+                :y1="tenants.find(t => t.id === conn.from)?.y || 0"
+                :x2="tenants.find(t => t.id === conn.to)?.x || 0"
+                :y2="tenants.find(t => t.id === conn.to)?.y || 0"
+                :stroke="conn.type === 'realtime' ? '#ef4444' : '#3b82f6'"
+                stroke-width="1"
+                opacity="0.3"
+              />
+            </g>
+
+            <!-- Draw nodes in minimap -->
+            <g class="minimap-nodes">
+              <circle
+                v-for="tenant in tenants"
+                :key="`minimap-node-${tenant.id}`"
+                :cx="tenant.x"
+                :cy="tenant.y"
+                r="4"
+                fill="#4b5563"
+                opacity="0.6"
+              />
+            </g>
+          </g>
+
+          <!-- Viewport indicator -->
+          <rect
+            :x="minimapViewport.x"
+            :y="minimapViewport.y"
+            :width="minimapViewport.width"
+            :height="minimapViewport.height"
+            fill="rgba(59, 130, 246, 0.1)"
+            stroke="#3b82f6"
+            stroke-width="2"
+            pointer-events="none"
+          />
+        </svg>
+      </div>
     </div>
   </div>
 </template>
@@ -896,9 +1051,14 @@ svg {
 }
 
 .node:hover text {
-  font-size: 10px;
   font-weight: 700;
   fill: #1e40af;
+}
+
+@media (min-width: 640px) {
+  .node:hover text {
+    font-size: 10px;
+  }
 }
 
 .node-label {
@@ -915,8 +1075,13 @@ svg {
 
 .node.selected text {
   font-weight: 700;
-  font-size: 9px;
   fill: #92400e;
+}
+
+@media (min-width: 640px) {
+  .node.selected text {
+    font-size: 9px;
+  }
 }
 
 .node.connected circle {
@@ -927,8 +1092,13 @@ svg {
 
 .node.connected text {
   font-weight: 600;
-  font-size: 8px;
   fill: #1e40af;
+}
+
+@media (min-width: 640px) {
+  .node.connected text {
+    font-size: 8px;
+  }
 }
 
 /* Search matched state */
@@ -942,8 +1112,13 @@ svg {
 
 .node.search-matched text {
   font-weight: 700;
-  font-size: 9px;
   fill: #166534;
+}
+
+@media (min-width: 640px) {
+  .node.search-matched text {
+    font-size: 9px;
+  }
 }
 
 @keyframes pulse-green {
@@ -1012,4 +1187,14 @@ svg {
     opacity: 1;
   }
 }
+
+/* Minimap */
+.minimap {
+  display: block;
+}
+
+.minimap:hover {
+  opacity: 0.9;
+}
+
 </style>
