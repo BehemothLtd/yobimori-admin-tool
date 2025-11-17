@@ -4,7 +4,11 @@ import { useRouter, useRoute } from "vue-router";
 // import { signOut } from "aws-amplify/auth";
 import {
   HomeOutlined,
-  ShopOutlined,
+  TeamOutlined,
+  CloudUploadOutlined,
+  SearchOutlined,
+  HistoryOutlined,
+  ExclamationCircleOutlined,
   CloseOutlined,
   LogoutOutlined,
 } from "@ant-design/icons-vue";
@@ -14,6 +18,7 @@ interface MenuItem {
   href: string;
   label: string;
   icon: any;
+  enabled: boolean;
 }
 
 interface Props {
@@ -35,11 +40,37 @@ const menuItems: MenuItem[] = [
     href: "/",
     label: "ホーム",
     icon: HomeOutlined,
+    enabled: true,
   },
   {
     href: "/tenants",
     label: "テナント管理",
-    icon: ShopOutlined,
+    icon: TeamOutlined,
+    enabled: true,
+  },
+  {
+    href: "/bulkOperations",
+    label: "一括操作",
+    icon: CloudUploadOutlined,
+    enabled: true,
+  },
+  {
+    href: "/device-search",
+    label: "デバイス検索",
+    icon: SearchOutlined,
+    enabled: true,
+  },
+  {
+    href: "/device-logs",
+    label: "デバイスログ確認",
+    icon: HistoryOutlined,
+    enabled: true,
+  },
+  {
+    href: "#",
+    label: "事故情報管理",
+    icon: ExclamationCircleOutlined,
+    enabled: false,
   },
 ];
 
@@ -49,9 +80,11 @@ const isCurrentPage = (href: string) => {
   return false;
 };
 
-const handleNavigation = (href: string) => {
-  router.push(href);
-  emit("close");
+const handleNavigation = (href: string, enabled: boolean) => {
+  if (enabled && href !== "#") {
+    router.push(href);
+    emit("close");
+  }
 };
 
 const handleLogout = async () => {
@@ -101,33 +134,67 @@ const handleLogout = async () => {
       </div>
 
       <!-- Menu Items -->
-      <nav class="flex-1 overflow-y-auto p-2">
-        <ul class="space-y-1">
+      <nav class="flex-1 overflow-y-auto p-3">
+        <ul class="space-y-2">
           <li v-for="item in menuItems" :key="item.href">
             <button
-              @click="handleNavigation(item.href)"
+              @click="handleNavigation(item.href, item.enabled)"
+              :disabled="!item.enabled"
               :class="[
-                'w-full flex items-center px-4 py-3 rounded-lg text-left transition-all duration-200',
-                isCurrentPage(item.href)
-                  ? 'bg-primary/10 text-primary font-semibold'
-                  : 'text-gray-700 hover:bg-gray-100',
+                'group w-full flex items-center gap-3 px-3 py-3.5 rounded-xl text-left transition-all duration-300',
+                !item.enabled
+                  ? 'cursor-not-allowed'
+                  : isCurrentPage(item.href)
+                  ? 'bg-gradient-to-br from-[#ef654d] via-[#ff8a65] to-[#ff9575] text-white shadow-lg shadow-orange-500/30 scale-[1.02]'
+                  : 'text-gray-700 hover:bg-gradient-to-r hover:from-orange-50 hover:to-pink-50 hover:shadow-md hover:scale-[1.02]',
               ]"
             >
-              <component :is="item.icon" class="text-xl mr-3 flex-shrink-0" />
-              <span>{{ item.label }}</span>
+              <!-- Icon Container -->
+              <div
+                :class="[
+                  'flex items-center justify-center w-9 h-9 rounded-lg transition-all duration-300',
+                  !item.enabled
+                    ? 'bg-gray-100 text-gray-400'
+                    : isCurrentPage(item.href)
+                    ? 'bg-white/20 text-white'
+                    : 'bg-gradient-to-br from-orange-50 to-pink-50 text-[#ef654d] group-hover:from-orange-100 group-hover:to-pink-100 group-hover:scale-110',
+                ]"
+              >
+                <component :is="item.icon" class="text-lg" />
+              </div>
+
+              <!-- Label and Badge -->
+              <div class="flex-1 flex items-center justify-between min-w-0">
+                <span
+                  :class="[
+                    'font-semibold text-sm',
+                    !item.enabled ? 'text-gray-400' : '',
+                  ]"
+                >
+                  {{ item.label }}
+                </span>
+                <span
+                  v-if="!item.enabled"
+                  class="text-[10px] px-2 py-0.5 rounded-full bg-gray-200 text-gray-500 font-medium whitespace-nowrap ml-2"
+                >
+                  準備中
+                </span>
+              </div>
             </button>
           </li>
         </ul>
       </nav>
 
       <!-- Drawer Footer with Logout -->
-      <div class="p-2 border-t border-gray-200">
+      <div class="p-3 border-t border-gray-200">
         <button
           @click="handleLogout"
-          class="w-full flex items-center px-4 py-3 rounded-lg text-left text-gray-700 hover:bg-gray-100 transition-all duration-200"
+          class="group w-full flex items-center gap-3 px-3 py-3.5 rounded-xl text-left text-gray-700 hover:bg-gradient-to-r hover:from-red-50 hover:to-orange-50 hover:text-red-600 transition-all duration-300 hover:shadow-md"
         >
-          <LogoutOutlined class="text-xl mr-3" />
-          <span>ログアウト</span>
+          <div class="flex items-center justify-center w-9 h-9 rounded-lg bg-gray-100 text-gray-600 group-hover:bg-red-100 group-hover:text-red-600 transition-all duration-300">
+            <LogoutOutlined class="text-lg" />
+          </div>
+          <span class="font-semibold text-sm">ログアウト</span>
         </button>
       </div>
     </aside>
