@@ -1,15 +1,10 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from "vue";
-import { useRouter } from "vue-router";
-import { LogoutOutlined } from "@ant-design/icons-vue";
 // Authentication disabled - using mock data
 // import { signOut } from "aws-amplify/auth";
 import DrawerMenu from "./DrawerMenu.vue";
 import Sidebar from "./Sidebar.vue";
-import useSwal from "@/composable/useSwal";
 
-const router = useRouter();
-const { success, error } = useSwal();
 const isDrawerOpen = ref(false);
 const isMobile = ref(false);
 
@@ -32,20 +27,6 @@ const toggleDrawer = () => {
 
 const closeDrawer = () => {
   isDrawerOpen.value = false;
-};
-
-const handleLogout = async () => {
-  try {
-    // Mock logout - no actual signOut needed
-    await success({ title: "ログアウトしました" });
-    // Redirect to home page
-    router.push("/");
-    // Reload to clear any cached data
-    window.location.reload();
-  } catch (err) {
-    console.error("Logout error:", err);
-    await error({ title: "ログアウトに失敗しました" });
-  }
 };
 </script>
 

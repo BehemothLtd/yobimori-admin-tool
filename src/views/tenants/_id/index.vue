@@ -1,16 +1,14 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import MainLayout from "@/components/MainLayout.vue";
 import {
   Breadcrumb,
-  PageHeader,
   BaseButton,
   LoadingSpinner,
 } from "@/components/base";
 import BusinessIcon from "@/components/icons/BusinessIcon.vue";
 import LinkedTenantsList from "@/components/tenants/LinkedTenantsList.vue";
-import TenantStatisticsCards from "@/components/TenantStatisticsCards.vue";
 import useSwal from "@/composable/useSwal";
 import useTenants from "@/composable/useTenants";
 import useCurrentUser from "@/composable/useCurrentUser";

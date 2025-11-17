@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, watch } from "vue";
-import { BaseButton, ToggleSwitch } from "@/components/base";
+import { ToggleSwitch } from "@/components/base";
 import CreateLinkedTenantModal from "./CreateLinkedTenantModal.vue";
 import type { Tenant, LinkedTenant } from "@/types/tenant";
 

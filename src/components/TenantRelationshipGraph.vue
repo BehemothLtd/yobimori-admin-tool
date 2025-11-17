@@ -107,7 +107,6 @@ const calculateNodePositions = () => {
   const repulsionStrength = 12000;
   const attractionStrength = 0.004;
   const dampening = 0.8;
-  const minDistance = 80;
 
   // Velocity for each node
   const velocities = tenants.value.map(() => ({ vx: 0, vy: 0 }));
@@ -120,8 +119,15 @@ const calculateNodePositions = () => {
     // Repulsion between all nodes
     for (let i = 0; i < tenants.value.length; i++) {
       for (let j = i + 1; j < tenants.value.length; j++) {
-        const dx = tenants.value[j].x - tenants.value[i].x;
-        const dy = tenants.value[j].y - tenants.value[i].y;
+        const tenantI = tenants.value[i];
+        const tenantJ = tenants.value[j];
+        const forceI = forces[i];
+        const forceJ = forces[j];
+
+        if (!tenantI || !tenantJ || !forceI || !forceJ) continue;
+
+        const dx = tenantJ.x - tenantI.x;
+        const dy = tenantJ.y - tenantI.y;
         const distSq = Math.max(dx * dx + dy * dy, 1);
         const dist = Math.sqrt(distSq);
 
@@ -131,10 +137,10 @@ const calculateNodePositions = () => {
         const fx = (dx / dist) * force;
         const fy = (dy / dist) * force;
 
-        forces[i].fx -= fx;
-        forces[i].fy -= fy;
-        forces[j].fx += fx;
-        forces[j].fy += fy;
+        forceI.fx -= fx;
+        forceI.fy -= fy;
+        forceJ.fx += fx;
+        forceJ.fy += fy;
       }
     }
 
@@ -144,8 +150,15 @@ const calculateNodePositions = () => {
       const toIdx = tenants.value.findIndex((t) => t.id === conn.to);
 
       if (fromIdx !== -1 && toIdx !== -1) {
-        const dx = tenants.value[toIdx].x - tenants.value[fromIdx].x;
-        const dy = tenants.value[toIdx].y - tenants.value[fromIdx].y;
+        const fromTenant = tenants.value[fromIdx];
+        const toTenant = tenants.value[toIdx];
+        const forceFrom = forces[fromIdx];
+        const forceTo = forces[toIdx];
+
+        if (!fromTenant || !toTenant || !forceFrom || !forceTo) return;
+
+        const dx = toTenant.x - fromTenant.x;
+        const dy = toTenant.y - fromTenant.y;
         const distSq = dx * dx + dy * dy;
         const dist = Math.sqrt(Math.max(distSq, 0.01));
 
@@ -156,36 +169,43 @@ const calculateNodePositions = () => {
         const fx = (dx / dist) * force;
         const fy = (dy / dist) * force;
 
-        forces[fromIdx].fx += fx;
-        forces[fromIdx].fy += fy;
-        forces[toIdx].fx -= fx;
-        forces[toIdx].fy -= fy;
+        forceFrom.fx += fx;
+        forceFrom.fy += fy;
+        forceTo.fx -= fx;
+        forceTo.fy -= fy;
       }
     });
 
     // Gravity towards center (weak)
     tenants.value.forEach((tenant, i) => {
+      const force = forces[i];
+      if (!force) return;
+
       const dx = centerX - tenant.x;
       const dy = centerY - tenant.y;
-      forces[i].fx += dx * 0.002;
-      forces[i].fy += dy * 0.002;
+      force.fx += dx * 0.002;
+      force.fy += dy * 0.002;
     });
 
     // Update velocities and positions
     tenants.value.forEach((tenant, i) => {
-      velocities[i].vx = (velocities[i].vx + forces[i].fx) * dampening;
-      velocities[i].vy = (velocities[i].vy + forces[i].fy) * dampening;
+      const velocity = velocities[i];
+      const force = forces[i];
+      if (!velocity || !force) return;
+
+      velocity.vx = (velocity.vx + force.fx) * dampening;
+      velocity.vy = (velocity.vy + force.fy) * dampening;
 
       // Limit velocity
       const maxVelocity = 10;
-      const velocityMag = Math.sqrt(velocities[i].vx * velocities[i].vx + velocities[i].vy * velocities[i].vy);
+      const velocityMag = Math.sqrt(velocity.vx * velocity.vx + velocity.vy * velocity.vy);
       if (velocityMag > maxVelocity) {
-        velocities[i].vx = (velocities[i].vx / velocityMag) * maxVelocity;
-        velocities[i].vy = (velocities[i].vy / velocityMag) * maxVelocity;
+        velocity.vx = (velocity.vx / velocityMag) * maxVelocity;
+        velocity.vy = (velocity.vy / velocityMag) * maxVelocity;
       }
 
-      tenant.x += velocities[i].vx;
-      tenant.y += velocities[i].vy;
+      tenant.x += velocity.vx;
+      tenant.y += velocity.vy;
 
       // Keep nodes within bounds with padding
       tenant.x = Math.max(100, Math.min(svgWidth - 100, tenant.x));
@@ -262,7 +282,7 @@ const getConnectionStyle = (type: "realtime" | "normal") => {
 const getArrowPath = (
   fromId: string,
   toId: string,
-  bidirectional: boolean,
+  _bidirectional: boolean,
   curveDirection: "up" | "down" | "straight"
 ): string => {
   const fromNode = tenants.value.find((t) => t.id === fromId);
@@ -445,18 +465,6 @@ const handleNodeClick = (event: MouseEvent, tenant: Tenant) => {
   if (!draggedNode.value) {
     selectedNode.value = selectedNode.value?.id === tenant.id ? null : tenant;
   }
-};
-
-// Reset view
-const resetView = () => {
-  zoom.value = 1;
-  panX.value = 0;
-  panY.value = 0;
-};
-
-// Reorganize layout
-const reorganizeLayout = () => {
-  calculateNodePositions();
 };
 
 // Get connections for selected node
