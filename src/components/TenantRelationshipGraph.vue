@@ -268,7 +268,7 @@ const getConnectionStyle = (type: "realtime" | "normal") => {
   if (type === "realtime") {
     return {
       stroke: "#ef4444",
-      strokeWidth: "2",
+      strokeWidth: "1.5",
       strokeDasharray: "none",
       marker: "url(#arrowhead-realtime)",
     };
@@ -396,11 +396,11 @@ const getNodeOpacity = (tenant: Tenant): number => {
 const getConnectionOpacity = (from: string, to: string, baseOpacity: number): number => {
   // Search highlighting - show connections involving matched nodes
   if (searchQuery.value.trim()) {
-    return isConnectionSearchMatched(from, to) ? baseOpacity : 0.1;
+    return isConnectionSearchMatched(from, to) ? baseOpacity : 0.08;
   }
   // Selection highlighting
-  if (!selectedNode.value) return baseOpacity;
-  return isConnectionHighlighted(from, to) ? baseOpacity : 0.1;
+  if (!selectedNode.value) return baseOpacity * 0.6; // Make default connections more subtle
+  return isConnectionHighlighted(from, to) ? baseOpacity : 0.08;
 };
 
 // Get node highlight class
@@ -938,14 +938,14 @@ watch(searchMatchedTenants, (newMatches) => {
                 fill="#ffffff"
                 stroke="#4b5563"
                 :stroke-width="nodeRadius > 25 ? 3 : 2"
-                class="cursor-pointer"
+                class="cursor-pointer node-circle"
               />
               <text
                 text-anchor="middle"
                 dominant-baseline="middle"
-                :font-size="nodeRadius > 25 ? 12 : 8"
-                font-weight="600"
-                fill="#1e3a8a"
+                :font-size="nodeRadius > 25 ? 11 : 9"
+                font-weight="700"
+                fill="#1f2937"
                 class="pointer-events-none select-none node-label"
               >
                 {{ tenant.label }}
@@ -987,27 +987,34 @@ svg {
 .node circle {
   cursor: pointer;
   transition: all 0.2s ease;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
 }
 
 .node:hover circle {
   fill: #eff6ff;
   stroke: #3b82f6;
   stroke-width: 3;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4));
 }
 
 .node:hover text {
-  font-weight: 700;
+  font-weight: 800;
   fill: #1e40af;
 }
 
 @media (min-width: 640px) {
   .node:hover text {
-    font-size: 10px;
+    font-size: 11px;
   }
 }
 
 .node-label {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
+  paint-order: stroke fill;
+  stroke: #ffffff;
+  stroke-width: 2px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 /* Selection states */
@@ -1015,11 +1022,11 @@ svg {
   fill: #fef3c7;
   stroke: #f59e0b;
   stroke-width: 3;
-  filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.6));
+  filter: drop-shadow(0 0 12px rgba(245, 158, 11, 0.8));
 }
 
 .node.selected text {
-  font-weight: 700;
+  font-weight: 800;
   fill: #92400e;
 }
 
@@ -1033,10 +1040,11 @@ svg {
   fill: #dbeafe;
   stroke: #2563eb;
   stroke-width: 2.5;
+  filter: drop-shadow(0 2px 6px rgba(37, 99, 235, 0.4));
 }
 
 .node.connected text {
-  font-weight: 600;
+  font-weight: 700;
   fill: #1e40af;
 }
 
@@ -1051,12 +1059,12 @@ svg {
   fill: #dcfce7;
   stroke: #16a34a;
   stroke-width: 3;
-  filter: drop-shadow(0 0 10px rgba(22, 163, 74, 0.7));
+  filter: drop-shadow(0 0 14px rgba(22, 163, 74, 0.9));
   animation: pulse-green 1.5s ease-in-out infinite;
 }
 
 .node.search-matched text {
-  font-weight: 700;
+  font-weight: 800;
   fill: #166534;
 }
 

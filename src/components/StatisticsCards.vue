@@ -1,5 +1,5 @@
 <template>
-  <a-row :gutter="[16, 16]">
+  <a-row :gutter="[{ xs: 10, sm: 12, md: 16 }, { xs: 12, sm: 12, md: 16 }]">
     <!-- Total Tenants Card -->
     <a-col :xs="12" :sm="12" :lg="6">
       <StatCard

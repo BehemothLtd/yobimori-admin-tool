@@ -1,7 +1,7 @@
 <template>
   <div
     :class="[
-      'stat-card group relative overflow-hidden rounded-xl border-2 p-6 shadow-md transition-all duration-300 hover:shadow-xl hover:-translate-y-1 h-full flex flex-col',
+      'stat-card group relative overflow-hidden rounded-lg sm:rounded-xl border sm:border-2 p-2.5 sm:p-6 shadow-sm sm:shadow-md transition-all duration-300 hover:shadow-xl hover:-translate-y-1 h-full flex flex-col',
       cardClass,
     ]"
   >
@@ -37,29 +37,29 @@
 
     <!-- Mobile Layout (below md) -->
     <div class="flex md:hidden flex-col flex-1">
-      <div class="mb-3">
+      <div class="mb-1.5">
         <div
           :class="[
-            'flex h-12 w-12 items-center justify-center rounded-full transition-all group-hover:text-white flex-shrink-0',
+            'flex h-8 w-8 items-center justify-center rounded-full transition-all group-hover:text-white flex-shrink-0',
             iconClass,
           ]"
         >
-          <component :is="icon" class="text-xl" />
+          <component :is="icon" class="text-sm" />
         </div>
       </div>
       <p
-        class="text-left text-sm font-bold text-gray-700 mb-3 leading-tight min-h-[40px] flex items-start"
+        class="text-left text-xs font-bold text-gray-700 mb-1.5 leading-tight min-h-[28px] flex items-start"
       >
         {{ title }}
       </p>
-      <div class="flex items-end gap-2">
+      <div class="flex items-end gap-1.5">
         <p
           v-if="!loading"
-          :class="['text-3xl font-bold transition-all', valueClass]"
+          :class="['text-xl font-bold transition-all', valueClass]"
         >
           {{ value ?? 0 }}
         </p>
-        <div v-else class="h-9 w-20 animate-pulse rounded bg-gray-200"></div>
+        <div v-else class="h-6 w-14 animate-pulse rounded bg-gray-200"></div>
       </div>
     </div>
 
@@ -111,9 +111,9 @@ withDefaults(defineProps<StatCardProps>(), {
   display: block;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) {
   .stat-card {
-    min-height: 140px;
+    min-height: 85px;
   }
 }
 </style>

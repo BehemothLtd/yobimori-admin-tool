@@ -33,20 +33,20 @@ onMounted(async () => {
 <template>
   <MainLayout>
     <!-- Page Title with gradient -->
-    <div class="text-center mb-10 sm:mb-14">
+    <div class="text-center mb-3 sm:mb-10">
       <h2
-        class="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-primary via-primary-light to-primary bg-clip-text text-transparent mb-4 sm:mb-5"
+        class="text-xl sm:text-4xl font-bold bg-gradient-to-r from-primary via-primary-light to-primary bg-clip-text text-transparent mb-1.5 sm:mb-4"
       >
         ダッシュボード
       </h2>
 
       <div
-        class="mx-auto mt-4 h-1 w-24 bg-gradient-to-r from-primary to-primary-light rounded-full"
+        class="mx-auto mt-1.5 sm:mt-4 h-0.5 sm:h-1 w-12 sm:w-24 bg-gradient-to-r from-primary to-primary-light rounded-full"
       ></div>
     </div>
 
     <!-- Statistics Cards Section -->
-    <div class="mb-12 sm:mb-16">
+    <div class="mb-6 sm:mb-12">
       <StatisticsCards :stats="dashboardStats" :loading="loading" />
     </div>
 
