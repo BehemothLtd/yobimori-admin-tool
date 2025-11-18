@@ -45,10 +45,6 @@ const touchStartZoom = ref(1);
 // Selection state
 const selectedNode = ref<Tenant | null>(null);
 
-// Minimap dimensions
-const minimapWidth = 200;
-const minimapHeight = 150;
-
 // Search state
 const searchQuery = ref("");
 
@@ -425,19 +421,40 @@ const getNodeClass = (tenant: Tenant): string => {
 // Zoom control functions
 const zoomIn = () => {
   zoom.value = Math.min(5, zoom.value * 1.2);
+  constrainPan();
 };
 
 const zoomOut = () => {
   zoom.value = Math.max(0.1, zoom.value / 1.2);
+  constrainPan();
 };
 
 const resetZoom = () => {
   fitGraphToView();
 };
 
+// Constrain pan values to keep viewport within reasonable bounds
+const constrainPan = () => {
+  // Allow panning within a reasonable range based on the SVG size and zoom
+  // The graph can be larger than the viewport, so allow panning beyond the viewport
+  const graphSize = Math.max(svgWidth.value, svgHeight.value) * zoom.value;
+  const maxPan = graphSize * 2; // Allow panning up to 2x the graph size in any direction
+
+  panX.value = Math.max(-maxPan, Math.min(maxPan, panX.value));
+  panY.value = Math.max(-maxPan, Math.min(maxPan, panY.value));
+};
+
 // Pan handlers
 const handleMouseDown = (event: MouseEvent) => {
-  if (event.target === svgRef.value || (event.target as SVGElement).classList.contains('background')) {
+  const target = event.target as SVGElement;
+
+  // Allow panning unless clicking on a node (circle or text)
+  // SVG elements have uppercase tagNames
+  const tagName = target.tagName.toUpperCase();
+  const isNode = tagName === 'CIRCLE' || tagName === 'TEXT' || target.closest('.node');
+
+  if (!isNode) {
+    event.preventDefault();
     isPanning.value = true;
     panStartX.value = event.clientX - panX.value;
     panStartY.value = event.clientY - panY.value;
@@ -450,6 +467,7 @@ const handleMouseMove = (event: MouseEvent) => {
   if (isPanning.value) {
     panX.value = event.clientX - panStartX.value;
     panY.value = event.clientY - panStartY.value;
+    constrainPan();
   }
 };
 
@@ -460,7 +478,15 @@ const handleMouseUp = () => {
 // Node click handler for selection
 const handleNodeClick = (event: MouseEvent, tenant: Tenant) => {
   event.stopPropagation();
-  selectedNode.value = selectedNode.value?.id === tenant.id ? null : tenant;
+
+  // Toggle selection or select new node
+  const isAlreadySelected = selectedNode.value?.id === tenant.id;
+  selectedNode.value = isAlreadySelected ? null : tenant;
+
+  // Focus on the node if it's being selected (not deselected)
+  if (!isAlreadySelected) {
+    focusOnNode(tenant);
+  }
 };
 
 // Touch event handlers for mobile
@@ -510,6 +536,7 @@ const handleTouchMove = (event: TouchEvent) => {
     if (touch) {
       panX.value = touch.clientX - panStartX.value;
       panY.value = touch.clientY - panStartY.value;
+      constrainPan();
     }
   }
 };
@@ -557,47 +584,6 @@ const stats = computed(() => {
     totalConnections: realtimeCount + normalCount,
   };
 });
-
-// Minimap scale factor
-const minimapScale = computed(() => {
-  const scaleX = minimapWidth / svgWidth.value;
-  const scaleY = minimapHeight / svgHeight.value;
-  return Math.min(scaleX, scaleY);
-});
-
-// Minimap viewport rectangle
-const minimapViewport = computed(() => {
-  const scale = minimapScale.value;
-  const viewportWidth = svgWidth.value * scale / zoom.value;
-  const viewportHeight = svgHeight.value * scale / zoom.value;
-  const viewportX = -panX.value * scale / zoom.value;
-  const viewportY = -panY.value * scale / zoom.value;
-
-  return {
-    x: viewportX,
-    y: viewportY,
-    width: viewportWidth,
-    height: viewportHeight,
-  };
-});
-
-// Handle minimap click to navigate
-const handleMinimapClick = (event: MouseEvent) => {
-  const minimapSvg = event.currentTarget as SVGSVGElement;
-  const rect = minimapSvg.getBoundingClientRect();
-  const clickX = event.clientX - rect.left;
-  const clickY = event.clientY - rect.top;
-
-  const scale = minimapScale.value;
-
-  // Convert minimap coordinates to main canvas coordinates
-  const mainX = clickX / scale;
-  const mainY = clickY / scale;
-
-  // Center the view on the clicked position
-  panX.value = -(mainX - svgWidth.value / 2) * zoom.value;
-  panY.value = -(mainY - svgHeight.value / 2) * zoom.value;
-};
 
 // Fit the entire graph into view
 const fitGraphToView = () => {
@@ -752,7 +738,7 @@ watch(searchMatchedTenants, (newMatches) => {
 
     <!-- Instructions -->
     <div class="text-gray-500 text-xs italic mb-4 hidden sm:block">
-      💡 ズームボタンでズーム • 背景をドラッグで移動 • ノードをクリックで関係をハイライト
+      💡 ズームボタンでズーム • クリック＆ドラッグで移動 • ノードをクリックで関係をハイライト
     </div>
     <div class="text-gray-500 text-xs italic mb-4 sm:hidden">
       💡 ピンチでズーム • ドラッグで移動 • タップで詳細表示
@@ -850,8 +836,8 @@ watch(searchMatchedTenants, (newMatches) => {
         ref="svgRef"
         :width="svgWidth"
         :height="svgHeight"
-        class="mx-auto cursor-grab touch-none"
-        :class="{ 'cursor-grabbing': isPanning }"
+        class="mx-auto touch-none"
+        :class="isPanning ? 'cursor-grabbing' : 'cursor-grab'"
         @mousedown="handleMouseDown"
         @touchstart="handleTouchStart"
         @touchmove="handleTouchMove"
@@ -865,6 +851,7 @@ watch(searchMatchedTenants, (newMatches) => {
           :width="svgWidth"
           :height="svgHeight"
           fill="transparent"
+          style="pointer-events: all;"
         />
 
         <!-- Define arrow markers -->
@@ -895,9 +882,9 @@ watch(searchMatchedTenants, (newMatches) => {
         </defs>
 
         <!-- Main group with transform for pan/zoom -->
-        <g :transform="transform">
+        <g :transform="transform" style="pointer-events: none;">
           <!-- Draw connections -->
-          <g class="connections">
+          <g class="connections" style="pointer-events: all;">
             <template
               v-for="conn in uniqueConnections"
               :key="`${conn.from}-${conn.to}-${conn.type}`"
@@ -937,7 +924,7 @@ watch(searchMatchedTenants, (newMatches) => {
           </g>
 
           <!-- Draw nodes -->
-          <g class="nodes">
+          <g class="nodes" style="pointer-events: all;">
             <g
               v-for="tenant in tenants"
               :key="tenant.id"
@@ -967,68 +954,6 @@ watch(searchMatchedTenants, (newMatches) => {
           </g>
         </g>
       </svg>
-
-      <!-- Minimap - Desktop only -->
-      <div class="hidden sm:block absolute bottom-4 right-4 bg-white rounded-lg shadow-lg border-2 border-gray-300 overflow-hidden z-10">
-        <svg
-          :width="minimapWidth"
-          :height="minimapHeight"
-          class="minimap cursor-pointer"
-          @click="handleMinimapClick"
-        >
-          <!-- Background -->
-          <rect
-            x="0"
-            y="0"
-            :width="minimapWidth"
-            :height="minimapHeight"
-            fill="#f9fafb"
-          />
-
-          <!-- Minimap content -->
-          <g :transform="`scale(${minimapScale})`">
-            <!-- Draw connections in minimap -->
-            <g class="minimap-connections">
-              <line
-                v-for="(conn, idx) in uniqueConnections"
-                :key="`minimap-conn-${idx}`"
-                :x1="tenants.find(t => t.id === conn.from)?.x || 0"
-                :y1="tenants.find(t => t.id === conn.from)?.y || 0"
-                :x2="tenants.find(t => t.id === conn.to)?.x || 0"
-                :y2="tenants.find(t => t.id === conn.to)?.y || 0"
-                :stroke="conn.type === 'realtime' ? '#ef4444' : '#3b82f6'"
-                stroke-width="1"
-                opacity="0.3"
-              />
-            </g>
-
-            <!-- Draw nodes in minimap -->
-            <g class="minimap-nodes">
-              <circle
-                v-for="tenant in tenants"
-                :key="`minimap-node-${tenant.id}`"
-                :cx="tenant.x"
-                :cy="tenant.y"
-                r="4"
-                fill="#4b5563"
-                opacity="0.6"
-              />
-            </g>
-          </g>
-
-          <!-- Viewport indicator -->
-          <rect
-            :x="minimapViewport.x"
-            :y="minimapViewport.y"
-            :width="minimapViewport.width"
-            :height="minimapViewport.height"
-            fill="rgba(59, 130, 246, 0.1)"
-            stroke="#3b82f6"
-            stroke-width="2"
-            pointer-events="none"
-          />
-        </svg>
-      </div>
     </div>
   </div>
 </template>
@@ -1207,14 +1132,4 @@ svg {
     opacity: 1;
   }
 }
-
-/* Minimap */
-.minimap {
-  display: block;
-}
-
-.minimap:hover {
-  opacity: 0.9;
-}
-
 </style>
